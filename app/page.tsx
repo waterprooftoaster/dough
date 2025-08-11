@@ -14,7 +14,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header with menu bar in upper right */}
-      <header className="flex justify-end p-6 bg-white shadow-md">
+      <header className="flex justify-center p-6 bg-white shadow-md">
         <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
@@ -28,11 +28,9 @@ export default function LandingPage() {
       </header>
 
       {/* Main landing content */}
-      <main className="flex flex-col items-center justify-center flex-1 px-4 py-12 text-center">
-        <h1 className="text-5xl font-bold mb-4">Money Talk, Dough Listens.</h1>
-        <p className="text-lg text-gray-600 mb-8">
-          This is your new landing page. Customize it with your content.
-        </p>
+      <main className="flex flex-col items-center justify-left flex-1 px-4 py-12 text-left">
+        <h1 className="text-5xl font-bold mb-4"> Money Talks. </h1>
+        <h1 className="text-5xl font-bold mb-4"> Dough Listens. </h1>
         <a
           href="#"
           className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
