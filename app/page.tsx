@@ -13,6 +13,7 @@ import {
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
+      
       {/* Header with menu bar in upper right */}
       <header className="flex justify-center p-6 bg-white shadow-md">
         <NavigationMenu>
@@ -41,7 +42,7 @@ export default function LandingPage() {
 
       {/* Main landing content */}
       <main className="flex flex-col items-center justify-left flex-1 px-4 py-12 text-left">
-        <h1 className="text-5xl font-bold mb-4"> Money Talks. </h1>
+        <h1 className="text-5xl font-bold mb-4"> Money Talks, </h1>
         <h1 className="text-5xl font-bold mb-4"> Dough Listens. </h1>
         <a
           href="#"
