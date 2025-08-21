@@ -18,10 +18,22 @@ export default function LandingPage() {
         <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
+
             <NavigationMenuTrigger>Item One</NavigationMenuTrigger>
             <NavigationMenuContent>
               <NavigationMenuLink>Link</NavigationMenuLink>
             </NavigationMenuContent>
+
+            <NavigationMenuTrigger>Item Two</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <NavigationMenuLink>Link</NavigationMenuLink>
+            </NavigationMenuContent>
+
+            <NavigationMenuTrigger>Item Three</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <NavigationMenuLink>Link</NavigationMenuLink>
+            </NavigationMenuContent>
+
           </NavigationMenuItem>
         </NavigationMenuList>
         </NavigationMenu>
