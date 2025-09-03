@@ -14,7 +14,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       
-      {/* Header with menu bar in upper right */}
+      {/* Menu Bar */}
       <header className="flex justify-center p-6 bg-white shadow-md">
         <NavigationMenu>
         <NavigationMenuList>
