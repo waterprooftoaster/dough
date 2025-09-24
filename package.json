@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@prisma/client": "^6.16.2",
     "@radix-ui/react-navigation-menu": "^1.2.13",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -16,6 +17,7 @@
     "next": "15.4.6",
     "plaid": "^38.1.0",
     "plaid-threads": "^14.5.0",
+    "prisma": "^6.16.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-plaid-link": "^4.1.1",

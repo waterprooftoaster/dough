@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { plaidClient } from "@/lib/plaid";
+import { plaidClient } from "@/src/lib/plaid";
 import { prisma } from "@/lib/db";
 import { CountryCode } from "plaid";
 import { institutionLogos } from "@/lib/institutionLogos";
