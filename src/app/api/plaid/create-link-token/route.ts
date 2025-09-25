@@ -6,7 +6,7 @@ export async function POST() {
   try {
     const request = {
       user: { client_user_id: "user-id" },
-      client_name: "Personal Finance Dashboard",
+      client_name: "Dough",
       products: [Products.Transactions],
       country_codes: [CountryCode.Us],
       language: "en",
