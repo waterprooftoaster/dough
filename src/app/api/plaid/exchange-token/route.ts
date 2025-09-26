@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { plaidClient } from "@/src/lib/plaid";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/src/lib/db";
 import { CountryCode } from "plaid";
-import { institutionLogos } from "@/lib/institutionLogos";
+import { institutionLogos } from "@/src/lib/institution-logos";
 
 function formatLogoUrl(
   logo: string | null | undefined,
