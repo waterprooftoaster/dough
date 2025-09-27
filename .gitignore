@@ -38,5 +38,6 @@ yarn-error.log*
 next-env.d.ts
 
 #misc
-
+openapitools.json
+2020-09-14.yml
 /src/generated/prisma

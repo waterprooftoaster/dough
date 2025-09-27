@@ -34,27 +34,16 @@ export default function LandingPage() {
     }
   }, [linkToken]);
 
-  const onSuccess = useCallback(
-    async (public_token: string) => {
-      try {
-        const response = await fetch("/api/plaid/exchange-token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ public_token }),
-        });
-
-        if (!response.ok) throw new Error("Failed to exchange token");
-        refetch();
-      } catch (error) {
-        console.error("Error linking account:", error);
-      }
-    },
-    [refetch]
-  );
-
   const { open, ready } = usePlaidLink({
     token: linkToken,
-    onSuccess,
+    onSuccess: async (public_token: string, metadata: any) => {
+    // send public_token to server
+    console.log(public_token);
+    console.log(metadata);
+  },
+  onExit: async () => {
+    // handle the case when the user exits the Link flow
+  }
   });
 
   return (
