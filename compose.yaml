@@ -11,6 +11,11 @@ services:
   server:
     build:
       context: .
+      dockerfile: Dockerfile
+      args:
+        PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
+        PLAID_SECRET: ${PLAID_SECRET}
+        PLAID_ENV: ${PLAID_ENV}
     environment:
       NODE_ENV: production
     ports:
