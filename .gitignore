@@ -41,3 +41,4 @@ next-env.d.ts
 openapitools.json
 2020-09-14.yml
 /src/generated/prisma
+/prisma/dev.db
