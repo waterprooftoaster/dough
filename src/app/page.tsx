@@ -31,7 +31,8 @@ export default function LandingPage() {
     };
 
     if (!linkToken) {
-      console.error("Link token is null");
+      // link token always null on first render
+      // console.error("Link token is null");
       getToken();
     }
   }, [linkToken]);
