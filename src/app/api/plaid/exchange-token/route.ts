@@ -159,27 +159,27 @@ export async function POST(request: Request) {
         }
       }
 
-      // Handle accounts that no longer exist at the institution
-      const deletedAccounts = existingItem.accounts.filter(
-        (account) => !processedAccountIds.has(account.id)
-      );
+      // // Handle accounts that no longer exist at the institution
+      // const deletedAccounts = existingItem.accounts.filter(
+      //   (account) => !processedAccountIds.has(account.id)
+      // );
 
-      if (deletedAccounts.length > 0) {
-        console.log(
-          `Found ${deletedAccounts.length} accounts no longer available at institution`
-        );
-        // Optionally mark accounts as hidden instead of deleting them
-        await prisma.account.updateMany({
-          where: {
-            id: {
-              in: deletedAccounts.map((account) => account.id),
-            },
-          },
-          data: {
-            hidden: true,
-          },
-        });
-      }
+      // if (deletedAccounts.length > 0) {
+      //   console.log(
+      //     `Found ${deletedAccounts.length} accounts no longer available at institution`
+      //   );
+      //   // Optionally mark accounts as hidden instead of deleting them
+      //   await prisma.account.updateMany({
+      //     where: {
+      //       id: {
+      //         in: deletedAccounts.map((account) => account.id),
+      //       },
+      //     },
+      //     data: {
+      //       hidden: true,
+      //     },
+      //   });
+      // }
 
       return NextResponse.json({
         success: true,
