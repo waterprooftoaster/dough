@@ -8,12 +8,6 @@
 
 ARG NODE_VERSION=22.20.0
 
-ARG PLAID_CLIENT_ID
-ARG PLAID_SECRET
-ARG PLAID_ENV
-
-# Make build-time args available as env for build steps (Next.js build will see them)
-
 ################################################################################
 # Use node image for base image for all stages.
 FROM node:${NODE_VERSION}-alpine as base
@@ -21,9 +15,6 @@ FROM node:${NODE_VERSION}-alpine as base
 # Set working directory for all build stages.
 WORKDIR /usr/src/app
 
-ENV PLAID_CLIENT_ID=${PLAID_CLIENT_ID}
-ENV PLAID_SECRET=${PLAID_SECRET}
-ENV PLAID_ENV=${PLAID_ENV}
 
 ################################################################################
 # Create a stage for installing production dependecies.
@@ -52,7 +43,6 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 # Copy the rest of the source files into the image.
 COPY . .
 # Run the build script.
-RUN npx prisma generate
 RUN npm run build
 
 ################################################################################
