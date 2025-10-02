@@ -2,16 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { usePlaidLink } from "react-plaid-link";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuIndicator,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  NavigationMenuViewport,
-} from "@/src/components/ui/navigation-menu"
+import { MenuBar } from '../components/menu-bar';
 
 export default function LandingPage() {
   const [linkToken, setLinkToken] = useState<string | null>(null);
@@ -32,51 +23,36 @@ export default function LandingPage() {
 
     if (!linkToken) {
       // link token always null on first render
-      // console.error("Link token is null");
       getToken();
     }
   }, [linkToken]);
 
+const onSuccess = React.useCallback(
+    async (public_token: string) => {
+      try {
+        const response = await fetch("/api/plaid/exchange-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ public_token }),
+        });
+
+        if (!response.ok) throw new Error("Failed to exchange token");
+      } catch (error) {
+        console.error("Error linking account:", error);
+      }
+    },
+  []);
+
   const { open, ready } = usePlaidLink({
     token: linkToken,
-    onSuccess: async (public_token: string, metadata: any) => {
-    // send public_token to server
-    console.log(public_token);
-    console.log(metadata);
-  },
-  onExit: async () => {
-    // handle the case when the user exits the Link flow
-  }
+    onSuccess,
   });
 
   return (
     <div className="min-h-screen bg-gray-50">
       
       {/* Menu Bar */}
-      <header className="flex justify-center p-6 bg-white shadow-md">
-        <NavigationMenu>
-        <NavigationMenuList>
-          <NavigationMenuItem>
-
-            <NavigationMenuTrigger>Item One</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <NavigationMenuLink>Link</NavigationMenuLink>
-            </NavigationMenuContent>
-
-            <NavigationMenuTrigger>Item Two</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <NavigationMenuLink>Link</NavigationMenuLink>
-            </NavigationMenuContent>
-
-            <NavigationMenuTrigger>Item Three</NavigationMenuTrigger>
-            <NavigationMenuContent>
-              <NavigationMenuLink>Link</NavigationMenuLink>
-            </NavigationMenuContent>
-
-          </NavigationMenuItem>
-        </NavigationMenuList>
-        </NavigationMenu>
-      </header>
+      <MenuBar />
 
       {/* Main landing content */}
       <main className="flex flex-col items-center justify-left flex-1 px-4 py-12 text-left">
