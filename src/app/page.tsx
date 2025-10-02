@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { usePlaidLink } from "react-plaid-link";
-import { MenuBar } from '../components/ui/menu-bar';
+import { MenuBar } from '../components/menu-bar';
 
 export default function LandingPage() {
   const [linkToken, setLinkToken] = useState<string | null>(null);

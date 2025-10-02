@@ -18,7 +18,7 @@ export function MenuBar(){
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
-          <NavigationMenu>
+            <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
               <NavigationMenuTrigger>Item1</NavigationMenuTrigger>
