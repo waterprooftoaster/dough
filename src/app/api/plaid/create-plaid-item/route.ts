@@ -15,11 +15,11 @@ export async function POST(request: Request) {
     const item_id = exchangeResponse.data.item_id;
     console.log("Public token exchanged for access token.", { item_id });
 
-    // Get item details (may include institution_id)
+    // Get item details from Plaid
     const itemResponse = await plaidClient.itemGet({ access_token });
     const institutionId = itemResponse.data.item?.institution_id ?? null;
 
-    // Try to fetch institution details (name, logo)
+    // 
     let institutionName: string | null = null;
     let institutionLogo: string | null = null;
     if (institutionId) {
