@@ -17,11 +17,11 @@ datasource db {
 model PlaidItem {
   id              String    @id @default(cuid())
   itemId          String    @unique // Plaid's item_id
-  accessToken     String
+  accessToken     String    @unique
   provider        String    @default("plaid") // "plaid" or "coinbase"
-  institutionId   String
-  institutionName String?
-  institutionLogo String?
+  institutionId   String    @unique
+  institutionName String?   @unique
+  institutionLogo String?   @unique
   accounts        Account[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
