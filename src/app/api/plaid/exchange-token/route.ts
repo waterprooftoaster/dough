@@ -4,39 +4,6 @@ import { prisma } from "@/src/lib/db";
 import { CountryCode } from "plaid";
 import { institutionLogos } from "@/src/lib/institution-logos";
 
-function formatLogoUrl(
-  logo: string | null | undefined,
-  institutionId: string
-): string | null {
-  // First try the Plaid-provided logo
-  if (logo) {
-    // Check if it's already a data URL or regular URL
-    if (logo.startsWith("data:") || logo.startsWith("http")) {
-      return logo;
-    }
-    // Otherwise, assume it's a base64 string and format it as a data URL
-    return `data:image/png;base64,${logo}`;
-  }
-
-  // If no Plaid logo, try the fallback logo
-  return institutionLogos[institutionId] || null;
-}
-
-// Helper function to match accounts based on their characteristics
-function findMatchingAccount(account: any, existingAccounts: any[]) {
-  return existingAccounts.find(
-    (existing) =>
-      // Match by mask (last 4 digits) if available
-      account.mask &&
-      existing.mask === account.mask &&
-      // Match by account type
-      existing.type === account.type &&
-      // Match by subtype if available
-      ((!account.subtype && !existing.subtype) ||
-        existing.subtype === account.subtype)
-  );
-}
-
 export async function POST(request: Request) {
   try {
     const { public_token } = await request.json();
@@ -238,4 +205,37 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+function formatLogoUrl(
+  logo: string | null | undefined,
+  institutionId: string
+): string | null {
+  // First try the Plaid-provided logo
+  if (logo) {
+    // Check if it's already a data URL or regular URL
+    if (logo.startsWith("data:") || logo.startsWith("http")) {
+      return logo;
+    }
+    // Otherwise, assume it's a base64 string and format it as a data URL
+    return `data:image/png;base64,${logo}`;
+  }
+
+  // If no Plaid logo, try the fallback logo
+  return institutionLogos[institutionId] || null;
+}
+
+// Helper function to match accounts based on their characteristics
+function findMatchingAccount(account: any, existingAccounts: any[]) {
+  return existingAccounts.find(
+    (existing) =>
+      // Match by mask (last 4 digits) if available
+      account.mask &&
+      existing.mask === account.mask &&
+      // Match by account type
+      existing.type === account.type &&
+      // Match by subtype if available
+      ((!account.subtype && !existing.subtype) ||
+        existing.subtype === account.subtype)
+  );
 }
