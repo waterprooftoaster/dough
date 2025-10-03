@@ -27,7 +27,7 @@ export default function LandingPage() {
 		}
 	}, [linkToken]);
 
-const onSuccess = React.useCallback(
+const onSuccess = useCallback(
 		async (public_token: string) => {
 			try {
 				const response = await fetch("/api/plaid/exchange-token", {
@@ -38,7 +38,7 @@ const onSuccess = React.useCallback(
 
 				if (!response.ok) throw new Error("Failed to exchange token");
 			} catch (error) {
-				console.error("Error linking account:", error);
+				console.error("Error linking account:");
 			}
 		},
 	[]);
