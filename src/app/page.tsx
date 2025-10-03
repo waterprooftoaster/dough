@@ -1,36 +1,40 @@
 "use client"
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { usePlaidLink } from "react-plaid-link";
+import {usePlaidLink,   
+				PlaidLinkOnExit,
+				PlaidLinkOnExitMetadata,
+				PlaidLinkError, 
+				} from "react-plaid-link";
 import { MenuBar } from '../components/menu-bar';
 
 export default function LandingPage() {
 	const [linkToken, setLinkToken] = useState<string | null>(null);
 
-	useEffect(() => {
-		const getToken = async () => {
-			try {
-				const response = await fetch("/api/plaid/create-link-token", {
-					method: "POST",
-				});
-				if (!response.ok) throw new Error("Failed to create link token");
-				const { link_token } = await response.json();
-				setLinkToken(link_token);
-			} catch (error) {
-				console.error("Error getting link token:", error);
-			}
-		};
+	const getToken = useCallback(async () => {
+		try {
+			const response = await fetch("/api/plaid/create-link-token", {
+				method: "POST",
+			});
+			if (!response.ok) throw new Error("Failed to create link token");
+			const { link_token } = await response.json();
+			setLinkToken(link_token);
+		} catch (error) {
+			console.error("Error getting link token:", error);
+		}
+	}, []);
 
+	useEffect(() => {
 		if (!linkToken) {
 			// link token always null on first render
 			getToken();
 		}
-	}, [linkToken]);
+	}, [linkToken, getToken]);
 
-const onSuccess = useCallback(
+	const onSuccess = useCallback(
 		async (public_token: string) => {
 			try {
-				const response = await fetch("/api/plaid/exchange-token", {
+				const response = await fetch("/api/plaid/create-plaid-item", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ public_token }),
@@ -42,10 +46,21 @@ const onSuccess = useCallback(
 			}
 		},
 	[]);
+	
+	const onExit = useCallback<PlaidLinkOnExit>(
+		(error: PlaidLinkError | null, metadata: PlaidLinkOnExitMetadata) => {
+			if (error != null && error.error_code === 'INVALID_LINK_TOKEN') {
+				getToken();
+			}
+			// to handle other error codes, see https://plaid.com/docs/errors/
+			console.log("User exited Plaid Link flow", { error, metadata });
+	},
+	[getToken]);
 
 	const { open, ready } = usePlaidLink({
 		token: linkToken,
 		onSuccess,
+		onExit
 	});
 
 	return (
