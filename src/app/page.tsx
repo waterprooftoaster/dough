@@ -13,9 +13,7 @@ export default function LandingPage() {
 
 	const getToken = useCallback(async () => {
 		try {
-			const response = await fetch("/api/plaid/create-link-token", {
-				method: "POST",
-			});
+			const response = await fetch("/api/plaid/create-link-token", {method: "POST",});
 			if (!response.ok) throw new Error("Failed to create link token");
 			const { link_token } = await response.json();
 			setLinkToken(link_token);
@@ -39,7 +37,6 @@ export default function LandingPage() {
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({ public_token }),
 				});
-
 				if (!response.ok) throw new Error("Failed to exchange token");
 			} catch (error) {
 				console.error("Error linking account:");
