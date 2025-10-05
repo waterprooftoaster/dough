@@ -3,10 +3,18 @@ import { plaidClient } from "@/src/lib/plaid";
 import { prisma } from "@/src/lib/db";
 import { CountryCode } from "plaid";
 
+// to remove: plaiditem created for the same institution and with the same credentials will 
+// return a different item_id each time. this is done on purpose. 
+// no need for update and just create a new one each time.
+
+// to add: delete the old item if new one has the same institutionid
+// transcations, balances, etc
+
 export async function POST(request: Request) {
   // Read public token from the client
   const { public_token } = await request.json();
   console.log("Exchanging public token...");
+
 
   // Exchange public token for access token & item id
   let access_token: string;
@@ -23,6 +31,7 @@ export async function POST(request: Request) {
     console.error("Error exchanging public token:", error);
     return NextResponse.json({ error: "Failed to exchange public token" }, { status: 500 });
   }
+
 
   // Get institution details
   let institutionId : string;
@@ -43,9 +52,11 @@ export async function POST(request: Request) {
     console.warn("Could not fetch institution details", error);
   }
 
-  // Find if plaidItem already exists
-  const existingItem = await prisma.plaidItem.findUnique({ where: { itemId: item_id } });
+
+  // Find if institution already exists
+  const existingItem = await prisma.plaidItem.find({ where: { institutionId: institutionId } });
   const accountsResponse = await plaidClient.accountsGet({ access_token });
+
 
   // Create new plaidItem if it doesn't exist
   if (!existingItem) {
@@ -59,33 +70,53 @@ export async function POST(request: Request) {
         institutionLogo: institution?.logo,
       },
     });
-    for (const account of accountsResponse.data.accounts) {
-      createAccount(account, item_id);
-    }
+    await Promise.all(
+      accountsResponse.data.accounts.map((account) => createAccount(account, newItem.id))
+    );
+
 
   // If it exists, update the plaidItem
   } else {
     console.log("PlaidItem already exists, updating...");
-    for (const account of accountsResponse.data.accounts) {
-      // check if account exists
-      const existingAccount = await prisma.account.findUnique({ where: { accountId: account.account_id } });
-      if (existingAccount){
-        updateAccount(existingAccount, item_id);
-      }
-      else {
-        createAccount(account, item_id);
-      }
-    }
+    await Promise.all(
+      accountsResponse.data.accounts.map(async (account) => {
+        // Check if account exists, update if so, create if not
+        const existingAccount = await prisma.account.findUnique({ where: { accountId: account.account_id } });
+        if (existingAccount){
+          try{
+            await updateAccount(existingAccount, account);
+            console.log('Updated accoun${account.name} (${account.mask}');
+          }
+          catch(error){
+            console.error(`Error updating account ${account.name} (${account.mask}):`, error);
+          }
+        } else {
+          try{
+          await createAccount(account, existingItem.id);
+          console.log(`Updated account ${account.name} (${account.mask}`);
+          }
+          catch(error){
+            console.error(`Error creating account ${account.name} (${account.mask}):`, error);
+          }
+        }
+      })
+    )
   }
+  return NextResponse.json({ success: true });
 } // End of POST  
  
 
 // Helper functions 
-async function updateAccount(account: any, item_id: string) {
+async function createPlaidItem(accountId: string, balance: any) {
+  
+}
+
+async function updateAccount(existingAccount: any, account: any) {
+  console.log(`Updading account: ${account.name} (${account.mask})`)
   await prisma.account.update({
-    where: {id: account.id},
+    where: {id: existingAccount.id},
     data: {
-      accountId: account.accountId,
+      accountId: account.account_id,
       name: account.name,
       type: account.type,
       subtype: account.subtype || null,
@@ -94,7 +125,7 @@ async function updateAccount(account: any, item_id: string) {
   })
 }
 
-async function createAccount(account: any, item_id: string) {
+async function createAccount(account: any, plaiditemId: string) {
   console.log(`Creating new account: ${account.name} (${account.mask})`)
   const newAccount = await prisma.account.create({
     data: {
@@ -103,7 +134,7 @@ async function createAccount(account: any, item_id: string) {
       type: account.type,
       subtype: account.subtype || null,
       mask: account.mask || null,
-      itemId: item_id,
+      itemId: plaiditemId,
     },
   });
 }
