@@ -16,7 +16,7 @@ datasource db {
 
 model PlaidItem {
   id              String    @id @default(cuid())
-  plaidItemId          String    @unique // Plaid's item_id
+  itemId          String    @unique // Plaid's item_id
   accessToken     String    @unique
   provider        String    @default("plaid") // "plaid" or "coinbase"
   institutionId   String    @unique
