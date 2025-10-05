@@ -16,7 +16,7 @@ datasource db {
 
 model PlaidItem {
   id              String    @id @default(cuid())
-  itemId          String    @unique // Plaid's item_id
+  plaidItemId          String    @unique // Plaid's item_id
   accessToken     String    @unique
   provider        String    @default("plaid") // "plaid" or "coinbase"
   institutionId   String    @unique
@@ -39,7 +39,7 @@ model Account {
   metadata     String? // JSON string for additional data like real estate details
   url          String? // External reference URL
   plaidItem    PlaidItem                @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  itemId       String
+  itemId       String // PlaidItem's DB id, NOT Plaid's item_id
   balances     AccountBalance[]
   transactions Transaction[]
   downloadLogs TransactionDownloadLog[]
