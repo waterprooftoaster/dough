@@ -3,13 +3,6 @@ import { plaidClient } from "@/src/lib/plaid";
 import { prisma } from "@/src/lib/db";
 import { CountryCode } from "plaid";
 
-// to remove: plaiditem created for the same institution and with the same credentials will 
-// return a different item_id each time. this is done on purpose. 
-// no need for update and just create a new one each time.
-
-// to add: delete the old item if new one has the same institutionid
-// transcations, balances, etc
-
 export async function POST(request: Request) {
   // Read public token from the client
   const { public_token } = await request.json();
@@ -33,17 +26,17 @@ export async function POST(request: Request) {
 
   // Get institution details
   let institutionId : string;
+  let institution: any = null;
   const itemResponse = await plaidClient.itemGet({ access_token });
   institutionId = itemResponse.data.item.institution_id ?? "";
-  let institution: any = null;
   if (institutionId.length === 0 ) { console.warn("No institution ID found for item"); }
   try {
-    const instRes = await plaidClient.institutionsGetById({
+    const institutionResponse = await plaidClient.institutionsGetById({
       institution_id: institutionId,
       country_codes: [CountryCode.Us],
       options: { include_optional_metadata: true },
     });
-    institution = instRes.data.institution ?? null;
+    institution = institutionResponse.data.institution ?? null;
     console.log(`Fetched institution details, id: ${institutionId} name: ${institution.name}`);
   } 
   catch (error) {
@@ -63,9 +56,16 @@ export async function POST(request: Request) {
     },
   });
   await Promise.all(
-    accountsResponse.data.accounts.map((account) => createAccount(account, newItem.id))
+    accountsResponse.data.accounts.map((account) => 
+      createAccount(account, newItem.id)
+    )
   );
-  return NextResponse.json({ success: true });
+
+  return NextResponse.json({ 
+    success: true,
+    message: "Created new Plaiditem",
+    institution: institution.name,
+  });
 } // End of POST  
  
 // Helper functions 
@@ -79,6 +79,18 @@ async function createAccount(account: any, plaiditemId: string) {
       subtype: account.subtype || null,
       mask: account.mask || null,
       plaidItemId: plaiditemId,
+    },
+  });
+  await createBalance(account, newAccount.id)
+}
+
+async function createBalance(account: any, prismaAccountId: string) {
+  await prisma.accountBalance.create({
+    data: {
+      accountId: prismaAccountId,
+      current: account.balances.current || 0,
+      available: account.balances.available || null,
+      limit: account.balances.limit || null,
     },
   });
 }
