@@ -42,7 +42,7 @@ export default function LandingPage() {
 				console.error("Error linking account:");
 			}
 		},
-	[]);
+		[]);
 	
 	const onExit = useCallback<PlaidLinkOnExit>(
 		(error: PlaidLinkError | null, metadata: PlaidLinkOnExitMetadata) => {
@@ -51,7 +51,7 @@ export default function LandingPage() {
 			}
 			// to handle other error codes, see https://plaid.com/docs/errors/
 			console.log("User exited Plaid Link flow", { error, metadata });
-	},
+		},
 	[getToken]);
 
 	const { open, ready } = usePlaidLink({
