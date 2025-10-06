@@ -1,6 +1,6 @@
 import { Account, PlaidItem, PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
-import { plaidClient } from "@/src/lib/plaid";
+import { plaidClient } from "@/src/lib/plaid-client";
 import { prisma } from "@/src/lib/db";
 import { CountryCode } from "plaid";
 
