@@ -1,32 +1,57 @@
 import { Account, PlaidItem, PrismaClient } from "@prisma/client";
-import { NextResponse } from "next/server";
-import { plaidClient } from "@/src/lib/plaid-client";
-import { prisma } from "@/src/lib/db";
-import { CountryCode } from "plaid";
+import { plaidClient } from "./plaid-client";
+import {
+  Configuration,
+  PlaidApi,
+  PlaidEnvironments,
+  Transaction as PlaidTransaction,
+  InvestmentTransaction,
+  Security,
+} from "plaid";
 
-async function downloadTransactions(
+export async function downloadTransactions(
   prisma: PrismaClient,
-  account: Account & {
-    plaidItem: PlaidItem;
-  }
-) {
-  if (account.type === "investment") {
-    return handleInvestmentTransactions(prisma, account);
-  } else {
-    return handleRegularTransactions(prisma, account);
-  }
+  account: Account & { plaidItem: PlaidItem; }) 
+{
+  getTransactions(prisma, account);
 }
 
-async function handleRegularTransactions ( 
-  prisma: PrismaClient,
-  account: Account & {
-    plaidItem: PlaidItem; }){
-  // placeholder
-}
 
-async function handleInvestmentTransactions ( 
+
+
+
+
+async function getTransactions(
   prisma: PrismaClient,
   account: Account & {
-    plaidItem: PlaidItem; }){
-  // placeholder
+    plaidItem: PlaidItem; }) 
+{
+  let allTransactions: PlaidTransaction[] = [];
+  let hasMore = true;
+  let cursor: string | undefined = undefined;
+
+  console.log("Starting transaction sync for account:", account.id);
+
+  // Keep fetching transactions until we get them all
+  while (hasMore) {
+    console.log("Fetching transactions with cursor:", cursor);
+    const response = await plaidClient.transactionsSync({
+      access_token: account.plaidItem.accessToken,
+      cursor,
+      count: 500,
+      options: {
+        include_original_description: true,
+        include_personal_finance_category: true,
+        account_id: account.plaidItemId,
+      },
+    });
+    console.log("Plaid API Response:", {
+      added: response.data.added.length,
+      modified: response.data.modified.length,
+      removed: response.data.removed.length,
+      has_more: response.data.has_more,
+    });
+    hasMore = response.data.has_more;
+    cursor = response.data.next_cursor;
+  }
 }
