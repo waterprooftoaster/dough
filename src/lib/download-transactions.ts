@@ -10,7 +10,7 @@ import {
 } from "plaid";
 
 
-async function aggregateTransactions( prisma: PrismaClient, plaidItem: PlaidItem){
+async function aggregateTransactions(prisma: PrismaClient, plaidItem: PlaidItem){
   let allTransactions: PlaidTransaction[] = [];
   let hasMore = true;
   let nextCursor = plaidItem.transactionCursor ?? "";
@@ -47,6 +47,6 @@ async function aggregateTransactions( prisma: PrismaClient, plaidItem: PlaidItem
   }
 }
 
-async function parseTransactions(){
+async function parseTransactions(prisma: PrismaClient, account: Account){
   // parse by account
 }
