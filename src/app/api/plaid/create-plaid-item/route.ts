@@ -70,7 +70,7 @@ export async function POST(request: Request) {
   if (existingInstitution) {
     console.log(`${existingInstitution.institutionName} duplicate found, removing duplicate account from old PlaidItem..`);
     const oldItemAccs = await prisma.account.findMany({ where: { plaidItemId: existingInstitution.id } });
-    await removeDuplicateAccounts(oldItemAccs, accountsResponse.data.accounts);
+    await removeDuplicateAccounts(oldItemAccs,accountsResponse.data.accounts);
   }
 
   return NextResponse.json({ 
