@@ -9,40 +9,23 @@ import {
   Security,
 } from "plaid";
 
-export async function downloadTransactions(
-  prisma: PrismaClient,
-  account: Account & { plaidItem: PlaidItem; }) 
-{
-  getTransactions(prisma, account);
-}
 
-
-
-
-
-
-async function getTransactions(
-  prisma: PrismaClient,
-  account: Account & {
-    plaidItem: PlaidItem; }) 
-{
+async function aggregateTransactions( prisma: PrismaClient, plaidItem: PlaidItem){
   let allTransactions: PlaidTransaction[] = [];
   let hasMore = true;
-  let cursor: string | undefined = undefined;
-
-  console.log("Starting transaction sync for account:", account.id);
+  let nextCursor = plaidItem.transactionCursor ?? "";
+  console.log(`Starting transaction sync for item: ${plaidItem.itemId}...`);
 
   // Keep fetching transactions until we get them all
   while (hasMore) {
-    console.log("Fetching transactions with cursor:", cursor);
+    console.log("Fetching transactions with cursor:", nextCursor);
     const response = await plaidClient.transactionsSync({
-      access_token: account.plaidItem.accessToken,
-      cursor,
+      access_token: plaidItem.accessToken,
+      cursor : nextCursor,
       count: 500,
       options: {
         include_original_description: true,
         include_personal_finance_category: true,
-        account_id: account.plaidItemId,
       },
     });
     console.log("Plaid API Response:", {
@@ -51,7 +34,19 @@ async function getTransactions(
       removed: response.data.removed.length,
       has_more: response.data.has_more,
     });
+    if (response.data.has_more === false){
+      await prisma.plaidItem.update({
+        where: {id: plaidItem.id},
+        data: {
+          transactionCursor: response.data.next_cursor
+        }
+      })
+    }
     hasMore = response.data.has_more;
-    cursor = response.data.next_cursor;
+    nextCursor = response.data.next_cursor;
   }
+}
+
+async function parseTransactions(){
+  // parse by account
 }

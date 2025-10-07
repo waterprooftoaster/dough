@@ -15,16 +15,17 @@ datasource db {
 }
 
 model PlaidItem {
-  id              String    @id @default(cuid())
-  itemId          String    @unique // Plaid's item_id
-  accessToken     String
-  provider        String    @default("plaid") // "plaid" or "coinbase"
-  institutionId   String
-  institutionName String?
-  institutionLogo String?
-  accounts        Account[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  itemId            String    @unique // Plaid's item_id
+  accessToken       String
+  provider          String    @default("plaid") // "plaid" or "coinbase"
+  institutionId     String
+  institutionName   String?
+  institutionLogo   String?
+  transactionCursor String? // Plaid's cursor to track transaction fetching
+  accounts          Account[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
 model Account {
