@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   }
 
   // Get institution details
-  let institution: any = null;
+  let institution : any;
   try {
     const itemResponse = await plaidClient.itemGet({ access_token });
     const institutionId = itemResponse.data.item.institution_id ?? "";
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       options: { include_optional_metadata: true },
     });
     institution = institutionResponse.data.institution ?? null;
-    console.log(`Fetched institution details, id: ${institutionId} name: ${institution.name}`);
+    console.log(`Fetched institution details, id: ${institution.id} name: ${institution.name}`);
   } 
   catch (error) {
     console.warn("Could not fetch institution details", error);
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
   // Check for existing institution in DB before creating new PlaidItem
   // If existingInstitution(s) are found, delete the old Item(s).
-  if (institution?.id) {
+  if (institution.id) {
     const existingItems = await prisma.plaidItem.findMany({ where: { institutionId: institution.id } });
     if (existingItems.length > 0) {
       await prisma.plaidItem.deleteMany({ where: { institutionId: institution.id } });
