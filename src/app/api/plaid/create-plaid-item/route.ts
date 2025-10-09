@@ -25,12 +25,11 @@ export async function POST(request: Request) {
   }
 
   // Get institution details
-  let institutionId : string;
   let institution: any = null;
-  const itemResponse = await plaidClient.itemGet({ access_token });
-  institutionId = itemResponse.data.item.institution_id ?? "";
-  if (institutionId.length === 0 ) { console.warn("No institution ID found for item"); }
   try {
+    const itemResponse = await plaidClient.itemGet({ access_token });
+    const institutionId = itemResponse.data.item.institution_id ?? "";
+    if (institutionId.length === 0 ) { console.warn("No institution ID found for item"); }
     const institutionResponse = await plaidClient.institutionsGetById({
       institution_id: institutionId,
       country_codes: [CountryCode.Us],
@@ -44,44 +43,52 @@ export async function POST(request: Request) {
   }
 
   // Check for existing institution in DB before creating new PlaidItem
-  // If existingInstitution is found, delete the duplicate accounts with the new PlaidItem
-  const existingInstitution = await prisma.plaidItem.findFirst({ where: { institutionId: institutionId } });
+  // If existingInstitution(s) are found, delete the old Item(s).
+  if (institution?.id) {
+    const existingItems = await prisma.plaidItem.findMany({ where: { institutionId: institution.id } });
+    if (existingItems.length > 0) {
+      await prisma.plaidItem.deleteMany({ where: { institutionId: institution.id } });
+    }
+  }
 
-  // Create PlaidItem in DB
+  // Create PlaidItem and its accounts in DB
   const accountsResponse = await plaidClient.accountsGet({ access_token });
   console.log("Creating new PlaidItem...");
   const newItem = await prisma.plaidItem.create({
     data: {
       itemId: item_id,
       accessToken: access_token,
-      institutionId : institutionId,
+      institutionId : institution.id,
       institutionName: institution?.name,
       institutionLogo: institution?.logo,
     },
   });
   await Promise.all(
     accountsResponse.data.accounts.map((account) => {
-      console.log(`Creating new account: ${account.name} (${account.mask})`),
-      createAccount(account, newItem.id)
+      console.log(`Creating new account: ${account.name} (${account.mask})`);
+      return createAccount(account, newItem.id);
     })
   );
-
-  // If institution already exists, delete duplicate accounts
-  if (existingInstitution) {
-    console.log(`${existingInstitution.institutionName} duplicate found, removing duplicate account from old PlaidItem..`);
-    const oldItemAccs = await prisma.account.findMany({ where: { plaidItemId: existingInstitution.id } });
-    await removeDuplicateAccounts(oldItemAccs,accountsResponse.data.accounts);
-  }
 
   return NextResponse.json({ 
     success: true,
     message: "Created new Plaiditem",
-    institution: institution.name,
+    institution: institution?.name ?? null,
   });
 } // End of POST  
  
 // Helper functions 
 async function createAccount(account: any, plaiditemId: string) {
+  async function createBalance(account: any, prismaAccountId: string) {
+    await prisma.accountBalance.create({
+      data: {
+        accountId: prismaAccountId,
+        current: account.balances.current || 0,
+        available: account.balances.available || null,
+        limit: account.balances.limit || null,
+      },
+    });
+  }
   const newAccount = await prisma.account.create({
     data: {
       accountId: account.account_id,
@@ -93,25 +100,4 @@ async function createAccount(account: any, plaiditemId: string) {
     },
   });
   await createBalance(account, newAccount.id)
-}
-
-async function createBalance(account: any, prismaAccountId: string) {
-  await prisma.accountBalance.create({
-    data: {
-      accountId: prismaAccountId,
-      current: account.balances.current || 0,
-      available: account.balances.available || null,
-      limit: account.balances.limit || null,
-    },
-  });
-}
-
-async function removeDuplicateAccounts(oldItemAccs: any[], newItemAccs: any[]) {
-  const accHash = new Set(newItemAccs.map(account => account.name + account.mask));
-  oldItemAccs.map(account => {
-    if (accHash.has(account.name + account.mask)) {
-      console.log(`Removing duplicate account ${account.name} (${account.mask})`),
-      prisma.account.delete( {where: { id: account.id }} )
-    }
-  })
 }
