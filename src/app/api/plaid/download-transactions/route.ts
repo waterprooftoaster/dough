@@ -30,9 +30,9 @@ async function aggregateTransactions(plaidItem: PlaidItem) {
   // Reference: https://plaid.com/docs/transactions/
   while (hasMore) {
     console.log("Fetching transactions with cursor:", nextCursor);
-    let transactionResponse: any = null;
+    let txResponse: any = null;
     try {
-      transactionResponse = await plaidClient.transactionsSync({
+      txResponse = await plaidClient.transactionsSync({
         access_token: plaidItem.accessToken,
         cursor: nextCursor,
         count: 500,
@@ -43,17 +43,17 @@ async function aggregateTransactions(plaidItem: PlaidItem) {
       });
       // Logs
       console.log("Plaid API Response:", {
-        added: transactionResponse.data.added?.length ?? 0,
-        modified: transactionResponse.data.modified?.length ?? 0,
-        removed: transactionResponse.data.removed?.length ?? 0,
-        has_more: transactionResponse.data.has_more,
+        added: txResponse.data.added?.length ?? 0,
+        modified: txResponse.data.modified?.length ?? 0,
+        removed: txResponse.data.removed?.length ?? 0,
+        has_more: txResponse.data.has_more,
       });
     }
     catch (error) {
       console.warn(`Unable to transactionSync item: ${plaidItem.itemId}`, error);
       break; // Stop on error
     }
-    const data = transactionResponse.data;
+    const data = txResponse.data;
 
     // Accumulate results from this page
     if (Array.isArray(data.added) && data.added.length) addedTx.push(...data.added as Transaction[]);
@@ -72,9 +72,18 @@ async function aggregateTransactions(plaidItem: PlaidItem) {
   }
 
   // Modify transactions in DB accordingly
-  for (const tx of addedTx) { await createTransaction(tx); }
-  for (const tx of removedTx) { await removeTransaction(tx); }
-  for (const tx of moddedTx) { await updateTransaction(tx); }
+  for (const tx of addedTx) { 
+    console.log(`Creating ${addedTx.length} transactions`)
+    await createTransaction(tx); 
+  }
+  for (const tx of removedTx) { 
+    console.log(`Removing ${removedTx.length} transactions`)
+    await removeTransaction(tx); 
+  }
+  for (const tx of moddedTx) { 
+    console.log(`Updating ${moddedTx.length} transactions`)
+    await updateTransaction(tx); 
+  }
 }
 
 // Helper funcs
@@ -82,17 +91,50 @@ async function createTransaction(tx: Transaction) {
   const existingTx = await prisma.transaction.findUnique({ where: { transactionId: tx.transaction_id } })
   if (existingTx) { console.log(`Transaction id=${tx.transaction_id} already exists`); }
   else {
-    console.log(`Creating transaction for ${tx.account_id}`)
     await prisma.transaction.create({
       data: {
         accountId: tx.account_id,
         transactionId: tx.transaction_id,
-        date: tx.date ? new Date(tx.date) : new Date(),
-        name: tx.name ?? "",
-        amount: typeof tx.amount === 'number' ? tx.amount : 0,
-        category: Array.isArray(tx.category) ? tx.category.join(' > ') : (tx.category?.[0] ?? null),
-        merchantName: tx.merchant_name ?? null,
-        pending: !!tx.pending,
+        date: new Date(tx.date),
+        name: tx.name,
+        amount: tx.amount,
+        category: tx.category ? tx.category[0] : null,
+        merchantName: tx.merchant_name,
+        pending: tx.pending,
+        // Additional fields
+        isoCurrencyCode: tx.iso_currency_code,
+        unofficialCurrencyCode: tx.unofficial_currency_code,
+        authorizedDate: tx.authorized_date
+          ? new Date(tx.authorized_date)
+          : null,
+        authorizedDatetime: tx.authorized_datetime
+          ? new Date(tx.authorized_datetime)
+          : null,
+        datetime: tx.datetime
+          ? new Date(tx.datetime)
+          : null,
+        paymentChannel: tx.payment_channel,
+        transactionCode: tx.transaction_code,
+        personalFinanceCategory:
+          tx.personal_finance_category?.primary || null,
+        merchantEntityId: tx.merchant_entity_id,
+        // Location data
+        locationAddress: tx.location?.address,
+        locationCity: tx.location?.city,
+        locationRegion: tx.location?.region,
+        locationPostalCode: tx.location?.postal_code,
+        locationCountry: tx.location?.country,
+        locationLat: tx.location?.lat || null,
+        locationLon: tx.location?.lon || null,
+        // Payment metadata
+        byOrderOf: tx.payment_meta?.by_order_of,
+        payee: tx.payment_meta?.payee,
+        payer: tx.payment_meta?.payer,
+        paymentMethod: tx.payment_meta?.payment_method,
+        paymentProcessor: tx.payment_meta?.payment_processor,
+        ppd_id: tx.payment_meta?.ppd_id,
+        reason: tx.payment_meta?.reason,
+        referenceNumber: tx.payment_meta?.reference_number,
       }
     })
   }
@@ -101,7 +143,6 @@ async function createTransaction(tx: Transaction) {
 async function removeTransaction(tx: Transaction) {
   const existingTx = await prisma.transaction.findUnique({ where: { transactionId: tx.transaction_id } });
   if (existingTx) {
-    console.log(`Removing transaction id=${tx.transaction_id}`)
     await prisma.transaction.delete({ where: { id: existingTx.id } });
   } else { console.warn(`Could not find transaction ${tx.transaction_id} for removal`) }
 }
@@ -112,10 +153,44 @@ async function updateTransaction(tx: Transaction) {
     await prisma.transaction.update({
       where: { id: existingTx.id },
       data: {
-        name: tx.name ?? existingTx.name,
-        amount: typeof tx.amount === 'number' ? tx.amount : existingTx.amount,
-        pending: typeof tx.pending === 'boolean' ? tx.pending : existingTx.pending,
-        date: tx.date ? new Date(tx.date) : existingTx.date,
+        date: new Date(tx.date),
+          name: tx.name,
+          amount: tx.amount,
+          category: tx.category ? tx.category[0] : null,
+          merchantName: tx.merchant_name,
+          pending: tx.pending,
+          // Additional fields
+          isoCurrencyCode: tx.iso_currency_code,
+          unofficialCurrencyCode: tx.unofficial_currency_code,
+          authorizedDate: tx.authorized_date
+            ? new Date(tx.authorized_date)
+            : null,
+          authorizedDatetime: tx.authorized_datetime
+            ? new Date(tx.authorized_datetime)
+            : null,
+          datetime: tx.datetime ? new Date(tx.datetime) : null,
+          paymentChannel: tx.payment_channel,
+          transactionCode: tx.transaction_code,
+          personalFinanceCategory:
+            tx.personal_finance_category?.primary || null,
+          merchantEntityId: tx.merchant_entity_id,
+          // Location data
+          locationAddress: tx.location?.address,
+          locationCity: tx.location?.city,
+          locationRegion: tx.location?.region,
+          locationPostalCode: tx.location?.postal_code,
+          locationCountry: tx.location?.country,
+          locationLat: tx.location?.lat || null,
+          locationLon: tx.location?.lon || null,
+          // Payment metadata
+          byOrderOf: tx.payment_meta?.by_order_of,
+          payee: tx.payment_meta?.payee,
+          payer: tx.payment_meta?.payer,
+          paymentMethod: tx.payment_meta?.payment_method,
+          paymentProcessor: tx.payment_meta?.payment_processor,
+          ppd_id: tx.payment_meta?.ppd_id,
+          reason: tx.payment_meta?.reason,
+          referenceNumber: tx.payment_meta?.reference_number,
       }
     });
   } else { console.warn(`Could not find transaction ${tx.transaction_id} for modification`) }
