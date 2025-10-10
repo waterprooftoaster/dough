@@ -103,13 +103,11 @@ async function removeTransaction(tx: Transaction) {
   if (existingTx) {
     console.log(`Removing transaction id=${tx.transaction_id}`)
     await prisma.transaction.delete({ where: { id: existingTx.id } });
-  } else {
-    console.warn(`Could not find transaction ${tx.transaction_id} for removal`)
-  }
+  } else { console.warn(`Could not find transaction ${tx.transaction_id} for removal`) }
 }
 
 async function updateTransaction(tx: Transaction) {
-  const existingTx = await prisma.transaction.findFirst({ where: { transactionId: tx.transaction_id } });
+  const existingTx = await prisma.transaction.findUnique({ where: { transactionId: tx.transaction_id } });
   if (existingTx) {
     await prisma.transaction.update({
       where: { id: existingTx.id },
@@ -120,9 +118,7 @@ async function updateTransaction(tx: Transaction) {
         date: tx.date ? new Date(tx.date) : existingTx.date,
       }
     });
-  } else {
-    console.warn(`Could not find transaction ${tx.transaction_id} for modification`)
-  }
+  } else { console.warn(`Could not find transaction ${tx.transaction_id} for modification`) }
 }
 
 
