@@ -64,7 +64,7 @@ model Transaction {
   id                      String    @id @default(cuid())
   account                 Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
   accountId               String
-  plaidId                 String // Plaid's transaction_id or investment_transaction_id
+  transactionId           String    @unique // Plaid's transaction_id or investment_transaction_id
   date                    DateTime
   name                    String
   amount                  Float
@@ -122,7 +122,7 @@ model Transaction {
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
 
-  @@unique([accountId, plaidId])
+  @@unique([accountId, transactionId])
   @@index([date])
 }
 
