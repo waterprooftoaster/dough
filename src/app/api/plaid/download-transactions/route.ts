@@ -1,4 +1,4 @@
-import {NextResponse} from 'next/server'
+import { NextResponse } from 'next/server'
 import { PlaidItem } from "@prisma/client";
 import { plaidClient } from "@/src/lib/plaid-client";
 import { prisma } from "@/src/lib/db";
@@ -12,81 +12,76 @@ export async function POST(request: Request) {
   // Get transactions by bank
   // One bank many have multiple items
   const { institution_id } = await request.json();
-  const plaidItems = await prisma.plaidItem.findMany({where: {institutionId: institution_id}})
+  const plaidItems = await prisma.plaidItem.findMany({ where: { institutionId: institution_id } })
   await Promise.all(
-    plaidItems.map((item)=>aggregateTransactions(item))
+    plaidItems.map((item) => aggregateTransactions(item))
   )
   return NextResponse.json({ success: true })
 }
 
-async function aggregateTransactions(plaidItem: PlaidItem){
-  async function getTransactions(){
-    // Get all transactions
-    const addedTx : Transaction[] = [];
-    const removedTx : Transaction[] = [];
-    const moddedTx : Transaction[] = [];
-    let hasMore = true;
-    let nextCursor = plaidItem.transactionCursor ?? ""; // Start at "bookmark"
-    console.log(`Starting transaction sync for item: ${plaidItem.itemId}...`);
-    // Reference: https://plaid.com/docs/transactions/
-    while (hasMore) {
-      console.log("Fetching transactions with cursor:", nextCursor);
-      let transactionResponse: any = null;
-      try {
-        transactionResponse = await plaidClient.transactionsSync({
-          access_token: plaidItem.accessToken,
-          cursor: nextCursor,
-          count: 500,
-          options: {
-            include_original_description: true,
-            include_personal_finance_category: true,
-          },
-        });
-        // Logs
-        console.log("Plaid API Response:", {
-          added: transactionResponse.data.added?.length ?? 0,
-          modified: transactionResponse.data.modified?.length ?? 0,
-          removed: transactionResponse.data.removed?.length ?? 0,
-          has_more: transactionResponse.data.has_more,
-        });
-      }
-      catch (error) {
-        console.warn(`Unable to transactionSync item: ${plaidItem.itemId}`, error);
-        break; // Stop on error
-      }
-      const data = transactionResponse.data;
-
-      // Accumulate results from this page
-      if (Array.isArray(data.added) && data.added.length) addedTx.push(...data.added as Transaction[]);
-      if (Array.isArray(data.removed) && data.removed.length) removedTx.push(...data.removed as Transaction[]);
-      if (Array.isArray(data.modified) && data.modified.length) moddedTx.push(...data.modified as Transaction[]);
-
-      hasMore = !!data.has_more;
-      nextCursor = data.next_cursor ?? nextCursor;
-
-      // Save "bookmark" once reading finished
-      if (!hasMore) {
-        await prisma.plaidItem.update({
-          where: {id: plaidItem.id},
-          data: { transactionCursor: data.next_cursor }
-        });
-      }
+async function aggregateTransactions(plaidItem: PlaidItem) {
+  // Get all transactions
+  const addedTx: Transaction[] = [];
+  const removedTx: Transaction[] = [];
+  const moddedTx: Transaction[] = [];
+  let hasMore = true;
+  let nextCursor = plaidItem.transactionCursor ?? ""; // Start at "bookmark"
+  console.log(`Starting transaction sync for item: ${plaidItem.itemId}...`);
+  // Reference: https://plaid.com/docs/transactions/
+  while (hasMore) {
+    console.log("Fetching transactions with cursor:", nextCursor);
+    let transactionResponse: any = null;
+    try {
+      transactionResponse = await plaidClient.transactionsSync({
+        access_token: plaidItem.accessToken,
+        cursor: nextCursor,
+        count: 500,
+        options: {
+          include_original_description: true,
+          include_personal_finance_category: true,
+        },
+      });
+      // Logs
+      console.log("Plaid API Response:", {
+        added: transactionResponse.data.added?.length ?? 0,
+        modified: transactionResponse.data.modified?.length ?? 0,
+        removed: transactionResponse.data.removed?.length ?? 0,
+        has_more: transactionResponse.data.has_more,
+      });
     }
-    return {addedTx, removedTx, moddedTx}
+    catch (error) {
+      console.warn(`Unable to transactionSync item: ${plaidItem.itemId}`, error);
+      break; // Stop on error
+    }
+    const data = transactionResponse.data;
+
+    // Accumulate results from this page
+    if (Array.isArray(data.added) && data.added.length) addedTx.push(...data.added as Transaction[]);
+    if (Array.isArray(data.removed) && data.removed.length) removedTx.push(...data.removed as Transaction[]);
+    if (Array.isArray(data.modified) && data.modified.length) moddedTx.push(...data.modified as Transaction[]);
+    hasMore = !!data.has_more;
+    nextCursor = data.next_cursor ?? nextCursor;
+
+    // Save "bookmark" once reading finished
+    if (!hasMore) {
+      await prisma.plaidItem.update({
+        where: { id: plaidItem.id },
+        data: { transactionCursor: data.next_cursor }
+      });
+    }
   }
 
-  // First get all unseen transactions
-  const {addedTx, removedTx, moddedTx} = await getTransactions();
-  for (const tx of addedTx) {await createTransaction(tx);}
-  for (const tx of removedTx) {await removeTransaction(tx);}
-  for (const tx of moddedTx) {await updateTransaction(tx);}
+  // Modify transactions in DB accordingly
+  for (const tx of addedTx) { await createTransaction(tx); }
+  for (const tx of removedTx) { await removeTransaction(tx); }
+  for (const tx of moddedTx) { await updateTransaction(tx); }
 }
 
 // Helper funcs
-async function createTransaction(tx : Transaction){
-  const existingTx = await prisma.transaction.findUnique({where:{transactionId: tx.transaction_id}})
-  if(existingTx) {console.log(`Transaction id=${tx.transaction_id} already exists`);}
-  else{
+async function createTransaction(tx: Transaction) {
+  const existingTx = await prisma.transaction.findUnique({ where: { transactionId: tx.transaction_id } })
+  if (existingTx) { console.log(`Transaction id=${tx.transaction_id} already exists`); }
+  else {
     console.log(`Creating transaction for ${tx.account_id}`)
     await prisma.transaction.create({
       data: {
@@ -103,19 +98,19 @@ async function createTransaction(tx : Transaction){
   }
 }
 
-async function removeTransaction(tx : Transaction){
-  const existingTx = await prisma.transaction.findUnique({ where:{ transactionId: tx.transaction_id }});
-  if (existingTx){
+async function removeTransaction(tx: Transaction) {
+  const existingTx = await prisma.transaction.findUnique({ where: { transactionId: tx.transaction_id } });
+  if (existingTx) {
     console.log(`Removing transaction id=${tx.transaction_id}`)
-    await prisma.transaction.delete({ where: { id: existingTx.id }});
+    await prisma.transaction.delete({ where: { id: existingTx.id } });
   } else {
     console.warn(`Could not find transaction ${tx.transaction_id} for removal`)
   }
 }
 
-async function updateTransaction(tx: Transaction){
-  const existingTx = await prisma.transaction.findFirst({ where:{ transactionId: tx.transaction_id }});
-  if (existingTx){
+async function updateTransaction(tx: Transaction) {
+  const existingTx = await prisma.transaction.findFirst({ where: { transactionId: tx.transaction_id } });
+  if (existingTx) {
     await prisma.transaction.update({
       where: { id: existingTx.id },
       data: {
