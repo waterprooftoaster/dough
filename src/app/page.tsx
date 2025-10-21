@@ -18,6 +18,9 @@ import { MenuBar } from '../components/menu-bar';
 
 export default function LandingPage() {
 	const [linkToken, setLinkToken] = useState<string | null>(null);
+	const [transactions, setTransactions] = useState<any[]>([]);
+	const [syncing, setSyncing] = useState(false);
+	const [loading, setLoading] = useState(false);
 
 	const getToken = useCallback(async () => {
 		try {
@@ -36,6 +39,35 @@ export default function LandingPage() {
 			getToken();
 		}
 	}, [linkToken, getToken]);
+
+	// On mount: trigger a full transactions sync for all items, then load transactions
+	useEffect(() => {
+		let mounted = true;
+		async function syncAndLoad() {
+			setSyncing(true);
+			try {
+				// Trigger server-side sync for all items (no institution_id)
+				await fetch('/api/plaid/download-transactions', { method: 'POST' });
+			} catch (err) {
+				console.warn('Sync request failed', err);
+			} finally {
+				setSyncing(false);
+			}
+			// Load transactions to display
+			setLoading(true);
+			try {
+				const res = await fetch('/api/transactions');
+				if (!res.ok) throw new Error(`${res.status}`);
+				const data = await res.json();
+				if (!mounted) return;
+				setTransactions(data.transactions || []);
+			} catch (err) {
+				console.error('Failed to load transactions', err);
+			} finally { setLoading(false); }
+		}
+		syncAndLoad();
+		return () => { mounted = false };
+	}, []);
 
 	const onSuccess = useCallback(
 		async (public_token: string) => {
@@ -78,13 +110,46 @@ export default function LandingPage() {
 			<main className="flex flex-col items-center justify-left flex-1 px-4 py-12 text-left">
 				<h1 className="text-5xl font-bold mb-4"> Money Talks, </h1>
 				<h1 className="text-5xl font-bold mb-4"> Dough Listens. </h1>
-				<button
-					onClick={() => open()}
-					disabled={!ready}
-					className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-				>
-					Connect Bank
+				<div className="flex space-x-3 items-center">
+					<button
+						onClick={() => open()}
+						disabled={!ready}
+						className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+					>
+						Connect Bank
 					</button>
+					<div className="text-sm text-gray-600">{syncing ? 'Syncing transactions...' : 'Transactions synced'}</div>
+				</div>
+
+				{/* Transactions table */}
+				<div className="w-full mt-6">
+					{loading ? (
+						<div>Loading transactions...</div>
+					) : (
+						<table className="min-w-full bg-white border">
+							<thead>
+								<tr className="bg-gray-100">
+									<th className="px-4 py-2 text-left">Date</th>
+									<th className="px-4 py-2 text-left">Name</th>
+									<th className="px-4 py-2 text-right">Amount</th>
+									<th className="px-4 py-2 text-left">Account</th>
+									<th className="px-4 py-2 text-left">Category</th>
+								</tr>
+							</thead>
+							<tbody>
+								{transactions.map((t) => (
+									<tr key={t.id} className="border-t">
+										<td className="px-4 py-2">{new Date(t.date).toLocaleDateString()}</td>
+										<td className="px-4 py-2">{t.name}</td>
+										<td className="px-4 py-2 text-right">{t.amount}</td>
+										<td className="px-4 py-2">{t.accountId}</td>
+										<td className="px-4 py-2">{t.category}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					)}
+				</div>
 			</main>
 		</div>
 	)

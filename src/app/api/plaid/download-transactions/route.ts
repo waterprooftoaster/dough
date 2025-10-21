@@ -9,14 +9,22 @@ import {
 } from "plaid";
 
 export async function POST(request: Request) {
-  // Get transactions by bank
-  // One bank many have multiple items
-  const { institution_id } = await request.json();
-  const plaidItems = await prisma.plaidItem.findMany({ where: { institutionId: institution_id } })
-  await Promise.all(
-    plaidItems.map((item) => aggregateTransactions(item))
-  )
-  return NextResponse.json({ success: true })
+  // Get transactions by bank. If no institution_id provided, sync all items.
+  // One bank may have multiple items
+  let body: any = {};
+  try { body = await request.json(); } catch (e) { body = {}; }
+  const institution_id = body?.institution_id ?? null;
+
+  let plaidItems;
+  if (institution_id) {
+    plaidItems = await prisma.plaidItem.findMany({ where: { institutionId: institution_id } });
+  } else {
+    // Sync all items
+    plaidItems = await prisma.plaidItem.findMany();
+  }
+
+  await Promise.all(plaidItems.map((item) => aggregateTransactions(item)));
+  return NextResponse.json({ success: true, itemsSynced: plaidItems.length })
 }
 
 async function aggregateTransactions(plaidItem: PlaidItem) {
