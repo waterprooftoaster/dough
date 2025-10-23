@@ -18,9 +18,6 @@ import { MenuBar } from '../components/menu-bar';
 
 export default function LandingPage() {
 	const [linkToken, setLinkToken] = useState<string | null>(null);
-	const [transactions, setTransactions] = useState<any[]>([]);
-	const [syncing, setSyncing] = useState(false);
-	const [loading, setLoading] = useState(false);
 
 	const getToken = useCallback(async () => {
 		try {
@@ -33,41 +30,12 @@ export default function LandingPage() {
 		}
 	}, []);
 
+	// Link token always null first render
 	useEffect(() => {
 		if (!linkToken) {
-			// link token always null on first render
 			getToken();
 		}
 	}, [linkToken, getToken]);
-
-	// On mount: trigger a full transactions sync for all items, then load transactions
-	useEffect(() => {
-		let mounted = true;
-		async function syncAndLoad() {
-			setSyncing(true);
-			try {
-				// Trigger server-side sync for all items (no institution_id)
-				await fetch('/api/plaid/download-transactions', { method: 'POST' });
-			} catch (err) {
-				console.warn('Sync request failed', err);
-			} finally {
-				setSyncing(false);
-			}
-			// Load transactions to display
-			setLoading(true);
-			try {
-				const res = await fetch('/api/transactions');
-				if (!res.ok) throw new Error(`${res.status}`);
-				const data = await res.json();
-				if (!mounted) return;
-				setTransactions(data.transactions || []);
-			} catch (err) {
-				console.error('Failed to load transactions', err);
-			} finally { setLoading(false); }
-		}
-		syncAndLoad();
-		return () => { mounted = false };
-	}, []);
 
 	const onSuccess = useCallback(
 		async (public_token: string) => {
@@ -118,11 +86,9 @@ export default function LandingPage() {
 					>
 						Connect Bank
 					</button>
-					<div className="text-sm text-gray-600">{syncing ? 'Syncing transactions...' : 'Transactions synced'}</div>
+					{/* <div className="text-sm text-gray-600">{syncing ? 'Syncing transactions...' : 'Transactions synced'}</div> */}
 				</div>
-
-				{/* Transactions table */}
-				<div className="w-full mt-6">
+				{/* <div className="w-full mt-6">
 					{loading ? (
 						<div>Loading transactions...</div>
 					) : (
@@ -149,7 +115,7 @@ export default function LandingPage() {
 							</tbody>
 						</table>
 					)}
-				</div>
+				</div> */}
 			</main>
 		</div>
 	)

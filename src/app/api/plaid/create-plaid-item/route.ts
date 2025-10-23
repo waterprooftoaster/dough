@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     data: {
       itemId: item_id,
       accessToken: access_token,
-      institutionId : institution.id,
+      institutionId : institution.id || null,
       institutionName: institution?.name,
       institutionLogo: institution?.logo,
     },
