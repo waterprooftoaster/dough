@@ -1,11 +1,12 @@
 "use client"
 
 import React, { useCallback, useEffect, useState } from 'react';
-import {usePlaidLink,   
-				PlaidLinkOnExit,
-				PlaidLinkOnExitMetadata,
-				PlaidLinkError, 
-				} from "react-plaid-link";
+import {
+	usePlaidLink,
+	PlaidLinkOnExit,
+	PlaidLinkOnExitMetadata,
+	PlaidLinkError,
+} from "react-plaid-link";
 import { MenuBar } from '../components/menu-bar';
 
 //to do list:
@@ -19,23 +20,29 @@ import { MenuBar } from '../components/menu-bar';
 export default function LandingPage() {
 	const [linkToken, setLinkToken] = useState<string | null>(null);
 
-	const getToken = useCallback(async () => {
-		try {
-			const response = await fetch("/api/plaid/create-link-token", {method: "POST",});
-			if (!response.ok) throw new Error("Failed to create link token");
-			const { link_token } = await response.json();
-			setLinkToken(link_token);
-		} catch (error) {
-			console.error("Error getting link token:", error);
-		}
-	}, []);
+	const getToken = useCallback(
+		async () => {
+			try {
+				const response = await fetch("/api/plaid/create-link-token", { method: "POST", });
+				if (!response.ok) throw new Error("Failed to create link token");
+				const { link_token } = await response.json();
+				setLinkToken(link_token);
+			} catch (error) {
+				console.error("Error getting link token:", error);
+			}
+		}, []
+	);
 
-	// Link token always null first render
-	useEffect(() => {
-		if (!linkToken) {
-			getToken();
-		}
-	}, [linkToken, getToken]);
+	const update = useCallback(
+		async (dummy: any) => {
+			try {
+				const response = await fetch("/api/plaid/refresh-institutions", { method: "POST" });
+				
+			}
+			catch (error) {
+			}
+		}, []
+	);
 
 	const onSuccess = useCallback(
 		async (public_token: string) => {
@@ -49,18 +56,16 @@ export default function LandingPage() {
 			} catch (error) {
 				console.error("Error linking account:");
 			}
-		},
-		[]);
-	
+		}, []
+	);
+
 	const onExit = useCallback<PlaidLinkOnExit>(
 		(error: PlaidLinkError | null, metadata: PlaidLinkOnExitMetadata) => {
-			if (error != null && error.error_code === 'INVALID_LINK_TOKEN') {
-				getToken();
-			}
+			if (error != null && error.error_code === 'INVALID_LINK_TOKEN') { getToken(); }
 			// to handle other error codes, see https://plaid.com/docs/errors/
 			console.log("User exited Plaid Link flow", { error, metadata });
-		},
-	[getToken]);
+		}, [getToken]
+	);
 
 	const { open, ready } = usePlaidLink({
 		token: linkToken,
@@ -68,9 +73,18 @@ export default function LandingPage() {
 		onExit
 	});
 
+	// Get link token every render
+	useEffect(() => {
+		if (!linkToken) { getToken(); }
+	}, [linkToken, getToken]);
+
+	useEffect(() => {
+
+	})
+
 	return (
 		<div className="min-h-screen bg-gray-50">
-			
+
 			{/* Menu Bar */}
 			<MenuBar />
 

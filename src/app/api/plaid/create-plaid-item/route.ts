@@ -18,18 +18,18 @@ export async function POST(request: Request) {
     access_token = temp_access_token;
     item_id = temp_item_id;
     console.log("Public token exchanged for access token.", { item_id });
-  } 
+  }
   catch (error) {
     console.error("Error exchanging public token:", error);
     return NextResponse.json({ error: "Failed to exchange public token" }, { status: 500 });
   }
 
   // Get institution details
-  let institution : any;
+  let institution: any;
   try {
     const itemResponse = await plaidClient.itemGet({ access_token });
     const institutionId = itemResponse.data.item.institution_id ?? "";
-    if (institutionId.length === 0 ) { console.warn("No institution ID found for item"); }
+    if (institutionId.length === 0) { console.warn("No institution ID found for item"); }
     const institutionResponse = await plaidClient.institutionsGetById({
       institution_id: institutionId,
       country_codes: [CountryCode.Us],
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     });
     institution = institutionResponse.data.institution ?? null;
     console.log(`Fetched institution details, id: ${institution.id} name: ${institution.name}`);
-  } 
+  }
   catch (error) {
     console.warn("Could not fetch institution details", error);
   }
@@ -51,18 +51,20 @@ export async function POST(request: Request) {
     }
   }
 
-  // Create PlaidItem and its accounts in DB
+  // Create PlaidItem in DB
   const accountsResponse = await plaidClient.accountsGet({ access_token });
   console.log("Creating new PlaidItem...");
   const newItem = await prisma.plaidItem.create({
     data: {
       itemId: item_id,
       accessToken: access_token,
-      institutionId : institution.id || null,
+      institutionId: institution.id || null,
       institutionName: institution?.name,
       institutionLogo: institution?.logo,
     },
   });
+
+  // Create Accounts in DB
   await Promise.all(
     accountsResponse.data.accounts.map((account) => {
       console.log(`Creating new account: ${account.name} (${account.mask})`);
@@ -70,13 +72,25 @@ export async function POST(request: Request) {
     })
   );
 
-  return NextResponse.json({ 
+  // Fetch the Transactions 
+  async (itemResponse: any) => {
+    try {
+      const response = await fetch("refresh-institutions", {
+        method: "POST",
+        body:  itemResponse
+      });
+    }
+    catch (error) {
+      //
+    }
+  }
+  return NextResponse.json({
     success: true,
     message: "Created new Plaiditem",
     institution: institution?.name ?? null,
   });
 } // End of POST  
- 
+
 // Helper functions 
 async function createAccount(account: any, plaiditemId: string) {
   async function createBalance(account: any, prismaAccountId: string) {

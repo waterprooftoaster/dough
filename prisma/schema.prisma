@@ -19,7 +19,7 @@ model PlaidItem {
   itemId            String    @unique // Plaid's item_id
   accessToken       String
   provider          String    @default("plaid") // "plaid" or "coinbase"
-  institutionId     String
+  institutionId     String?
   institutionName   String?
   institutionLogo   String?
   transactionCursor String? // Plaid's cursor to track transaction fetching
