@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { plaidClient } from "@/src/lib/plaid-client";
 import { prisma } from "@/src/lib/db";
+import { aggregateTransactions } from "@/src/lib/transactions";
 import {
   CountryCode,
   Institution
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
 
   // Create PlaidItem in DB
   const accountsResponse = await plaidClient.accountsGet({ access_token });
-  console.log("Creating new PlaidItem...");
+  console.log(`Creating new plaidItem id=${item_id}...`);
   const newItem = await prisma.plaidItem.create({
     data: {
       itemId: item_id,
@@ -75,10 +76,14 @@ export async function POST(request: Request) {
   // Create Accounts in DB
   await Promise.all(
     accountsResponse.data.accounts.map((account) => {
-      console.log(`Creating new account: ${account.name} (${account.mask})`);
+      console.log(`Creating new account: ${account.name} (${account.mask})...`);
       return createAccount(account, newItem.id);
     })
   );
+
+  // Update Transactions and balances for accounts
+  console.log(`Getting transactions for plaidItem id=${item_id}...`)
+  await aggregateTransactions(newItem);
 
   return NextResponse.json({
     success: true,
