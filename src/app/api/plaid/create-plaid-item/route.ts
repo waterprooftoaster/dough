@@ -24,15 +24,20 @@ export async function POST(request: Request) {
   }
   catch (error) {
     console.error("Error exchanging public token:", error);
-    return NextResponse.json({ error: "Failed to exchange public token" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to exchange public token" },
+      { status: 500 }
+    );
   }
 
-  // Get institution details
+  // Get institution details or let it remain null
   let institution: Institution | null = null;
   try {
     const itemResponse = await plaidClient.itemGet({ access_token });
     const institutionId = itemResponse.data.item.institution_id ?? "";
-    if (institutionId.length === 0) { console.warn("No institution ID found for item"); }
+    if (institutionId.length === 0) {
+      console.warn("No institution ID found for item");
+    }
     const institutionResponse = await plaidClient.institutionsGetById({
       institution_id: institutionId,
       country_codes: [CountryCode.Us],
