@@ -78,12 +78,14 @@ export async function aggregateTransactions(plaidItem: PlaidItem) {
 // Helper funcs
 async function createTransaction(tx: Transaction) {
   const existingTx = await prisma.transaction.findUnique({ where: { transactionId: tx.transaction_id } })
-  const account = await prisma.account.findUnique({ where: { accountId: tx.account_id } })
   if (existingTx) {
     console.log(`Transaction id=${tx.transaction_id} already exists`);
+    updateTransaction(tx);
   }
+  const account = await prisma.account.findUnique({ where: { accountId: tx.account_id } })
   if (!account) {
     console.error(`Transaction id=${tx.transaction_id} does not have an associated account`)
+    return;
   }
   else {
     await prisma.transaction.create({
