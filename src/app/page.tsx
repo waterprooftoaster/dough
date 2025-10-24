@@ -10,10 +10,6 @@ import {
 import { MenuBar } from '../components/menu-bar';
 
 //to do list:
-// update transactions on accounts
-// update-institutions should be called on every render
-// 1. it deletes duplicating accounts across items, delete the older one
-// 2. it updates the accounts(transactions, mask, etc)
 // 3. a dashboard component to show the accounts
 // 4. a credit card suggestor page
 
