@@ -61,16 +61,16 @@ export async function aggregateTransactions(plaidItem: PlaidItem) {
   }
 
   // Modify transactions in DB accordingly
+  console.log(`Creating ${addedTx.length} transactions`)
   for (const tx of addedTx) {
-    console.log(`Creating ${addedTx.length} transactions`)
     await createTransaction(tx);
   }
+  console.log(`Removing ${removedTx.length} transactions`)
   for (const tx of removedTx) {
-    console.log(`Removing ${removedTx.length} transactions`)
     await removeTransaction(tx);
   }
+  console.log(`Updating ${moddedTx.length} transactions`)
   for (const tx of moddedTx) {
-    console.log(`Updating ${moddedTx.length} transactions`)
     await updateTransaction(tx);
   }
 }
