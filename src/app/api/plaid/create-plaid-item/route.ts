@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { plaidClient } from "@/src/lib/plaid-client";
 import { prisma } from "@/src/lib/db";
-import { CountryCode } from "plaid";
+import {
+  CountryCode,
+  Institution
+} from "plaid";
 
 export async function POST(request: Request) {
   // Read public token from the client
@@ -9,7 +12,7 @@ export async function POST(request: Request) {
   console.log("Exchanging public token...");
 
   // Exchange public token for access token & item id
-  let access_token: string;
+  let access_token: string = "";
   let item_id: string;
   try {
     const exchangeResponse = await plaidClient.itemPublicTokenExchange({ public_token });
@@ -25,7 +28,7 @@ export async function POST(request: Request) {
   }
 
   // Get institution details
-  let institution: any;
+  let institution: Institution | null = null;
   try {
     const itemResponse = await plaidClient.itemGet({ access_token });
     const institutionId = itemResponse.data.item.institution_id ?? "";
@@ -36,7 +39,7 @@ export async function POST(request: Request) {
       options: { include_optional_metadata: true },
     });
     institution = institutionResponse.data.institution ?? null;
-    console.log(`Fetched institution details, id: ${institution.id} name: ${institution.name}`);
+    console.log(`Fetched institution details, id: ${institution.institution_id} name: ${institution.name}`);
   }
   catch (error) {
     console.warn("Could not fetch institution details", error);
@@ -44,10 +47,10 @@ export async function POST(request: Request) {
 
   // Check for existing institution in DB before creating new PlaidItem
   // If existingInstitution(s) are found, delete the old Item(s).
-  if (institution.id) {
-    const existingItems = await prisma.plaidItem.findMany({ where: { institutionId: institution.id } });
+  if (institution?.institution_id) {
+    const existingItems = await prisma.plaidItem.findMany({ where: { institutionId: institution.institution_id } });
     if (existingItems.length > 0) {
-      await prisma.plaidItem.deleteMany({ where: { institutionId: institution.id } });
+      await prisma.plaidItem.deleteMany({ where: { institutionId: institution.institution_id } });
     }
   }
 
@@ -58,7 +61,7 @@ export async function POST(request: Request) {
     data: {
       itemId: item_id,
       accessToken: access_token,
-      institutionId: institution.id || null,
+      institutionId: institution?.institution_id || null,
       institutionName: institution?.name,
       institutionLogo: institution?.logo,
     },
@@ -72,18 +75,6 @@ export async function POST(request: Request) {
     })
   );
 
-  // Fetch the Transactions 
-  async (itemResponse: any) => {
-    try {
-      const response = await fetch("refresh-institutions", {
-        method: "POST",
-        body:  itemResponse
-      });
-    }
-    catch (error) {
-      //
-    }
-  }
   return NextResponse.json({
     success: true,
     message: "Created new Plaiditem",
