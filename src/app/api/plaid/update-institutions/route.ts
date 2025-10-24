@@ -23,8 +23,9 @@ export async function POST(request: Request) {
     // Sync all items
     plaidItems = await prisma.plaidItem.findMany();
   }
-  await Promise.all(plaidItems.map((item) => aggregateTransactions(item)));
-  return NextResponse.json({ success: true, itemsSynced: plaidItems.length })
+  plaidItems.forEach((item) => { aggregateTransactions(item); });
+
+  return NextResponse.json({ success: true, itemsSynced: plaidItems.length });
 }
 
 // Investment accounts handled differently
