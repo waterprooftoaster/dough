@@ -81,6 +81,7 @@ async function createTransaction(tx: Transaction) {
   if (existingTx) {
     console.log(`Transaction id=${tx.transaction_id} already exists`);
     updateTransaction(tx);
+    return;
   }
   const account = await prisma.account.findUnique({ where: { accountId: tx.account_id } })
   if (!account) {
