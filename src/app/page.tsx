@@ -33,13 +33,14 @@ export default function LandingPage() {
 		}, []
 	);
 
-	const update = useCallback(
-		async (dummy: any) => {
+	const updateItems = useCallback(
+		async () => {
 			try {
 				const response = await fetch("/api/plaid/refresh-institutions", { method: "POST" });
-				
+				if (!response.ok) throw new Error("Failed to update items");
 			}
 			catch (error) {
+				console.error("Error updating item:", error);
 			}
 		}, []
 	);
@@ -73,14 +74,13 @@ export default function LandingPage() {
 		onExit
 	});
 
-	// Get link token every render
+	// Get link token
 	useEffect(() => {
 		if (!linkToken) { getToken(); }
 	}, [linkToken, getToken]);
 
-	useEffect(() => {
-
-	})
+	// Update Items
+	useEffect(() => { updateItems(); })
 
 	return (
 		<div className="min-h-screen bg-gray-50">
