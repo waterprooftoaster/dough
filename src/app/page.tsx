@@ -29,18 +29,6 @@ export default function LandingPage() {
 		}, []
 	);
 
-	const updateItems = useCallback(
-		async () => {
-			try {
-				const response = await fetch("/api/plaid/refresh-institutions", { method: "POST" });
-				if (!response.ok) throw new Error("Failed to update items");
-			}
-			catch (error) {
-				console.error("Error updating item:", error);
-			}
-		}, []
-	);
-
 	const onSuccess = useCallback(
 		async (public_token: string) => {
 			try {
@@ -75,9 +63,6 @@ export default function LandingPage() {
 		if (!linkToken) { getToken(); }
 	}, [linkToken, getToken]);
 
-	// Update Items
-	useEffect(() => { updateItems(); })
-
 	return (
 		<div className="min-h-screen bg-gray-50">
 
@@ -96,36 +81,7 @@ export default function LandingPage() {
 					>
 						Connect Bank
 					</button>
-					{/* <div className="text-sm text-gray-600">{syncing ? 'Syncing transactions...' : 'Transactions synced'}</div> */}
 				</div>
-				{/* <div className="w-full mt-6">
-					{loading ? (
-						<div>Loading transactions...</div>
-					) : (
-						<table className="min-w-full bg-white border">
-							<thead>
-								<tr className="bg-gray-100">
-									<th className="px-4 py-2 text-left">Date</th>
-									<th className="px-4 py-2 text-left">Name</th>
-									<th className="px-4 py-2 text-right">Amount</th>
-									<th className="px-4 py-2 text-left">Account</th>
-									<th className="px-4 py-2 text-left">Category</th>
-								</tr>
-							</thead>
-							<tbody>
-								{transactions.map((t) => (
-									<tr key={t.id} className="border-t">
-										<td className="px-4 py-2">{new Date(t.date).toLocaleDateString()}</td>
-										<td className="px-4 py-2">{t.name}</td>
-										<td className="px-4 py-2 text-right">{t.amount}</td>
-										<td className="px-4 py-2">{t.accountId}</td>
-										<td className="px-4 py-2">{t.category}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					)}
-				</div> */}
 			</main>
 		</div>
 	)
