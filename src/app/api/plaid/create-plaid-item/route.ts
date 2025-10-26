@@ -53,10 +53,19 @@ export async function POST(request: Request) {
 
   // Check for existing institution in DB before creating new PlaidItem
   // If existingInstitution(s) are found, delete the old Item(s).
+  // In sandbox, some institutions don't have IDs, so we check by name only if ID cannot be found. 
   if (institution?.institution_id) {
     const existingItems = await prisma.plaidItem.findMany({ where: { institutionId: institution.institution_id } });
     if (existingItems.length > 0) {
+      console.log(`Duplicate institution: id: ${institution.institution_id} name: ${institution.name} found, deleting duplicate...`);
       await prisma.plaidItem.deleteMany({ where: { institutionId: institution.institution_id } });
+    }
+  }
+  else if (institution?.name) {
+    const existingItems = await prisma.plaidItem.findMany({ where: { institutionName: institution.name } });
+    if (existingItems.length > 0) {
+      console.log(`Duplicate institution: id: ${institution.institution_id} name: ${institution.name} found, deleting duplicate...`);
+      await prisma.plaidItem.deleteMany({ where: { institutionId: institution.name } });
     }
   }
 
@@ -68,8 +77,8 @@ export async function POST(request: Request) {
       itemId: item_id,
       accessToken: access_token,
       institutionId: institution?.institution_id || null,
-      institutionName: institution?.name,
-      institutionLogo: institution?.logo,
+      institutionName: institution?.name || null,
+      institutionLogo: institution?.logo || null
     },
   });
 
