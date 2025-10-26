@@ -12,7 +12,7 @@ import {
   PlaidLinkError,
 } from "react-plaid-link";
 
-export function plaidLink() {
+export function PlaidLink() {
   const [linkToken, setLinkToken] = useState<string | null>(null);
 
   const getToken = useCallback(
