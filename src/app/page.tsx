@@ -64,7 +64,7 @@ export default function LandingPage() {
 	}, [linkToken, getToken]);
 
 	return (
-		<div className="min-h-screen bg-gray-50">
+		<div className="min-h-screen">
 
 			{/* Menu Bar */}
 			<MenuBar />
@@ -77,12 +77,13 @@ export default function LandingPage() {
 					<button
 						onClick={() => open()}
 						disabled={!ready}
-						className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+						className="px-4 py-2 bg-primary rounded-lg hover:bg-primary/80 disabled:opacity-50 transition-colors"
 					>
 						Connect Bank
 					</button>
 				</div>
 			</main>
 		</div>
+
 	)
 }
