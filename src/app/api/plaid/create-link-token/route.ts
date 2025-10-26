@@ -1,23 +1,23 @@
 import { NextResponse } from "next/server";
-import { plaidClient } from "@/src/lib/plaid";
+import { plaidClient } from "@/src/lib/plaid-client";
 import { CountryCode, Products } from "plaid";
 
 export async function POST() {
   try {
-    const request = {
+    // Create a new link token
+    const response = await plaidClient.linkTokenCreate({
       user: { client_user_id: "user-id" },
       client_name: "Dough",
       products: [Products.Transactions],
       country_codes: [CountryCode.Us],
       language: "en",
       transactions: {
-        days_requested: 730, // Request 2 years of data
+        days_requested: 730, 
       },
-      optional_products: [Products.Investments], // Make investments optional
-    };
-
-    const response = await plaidClient.linkTokenCreate(request);
+      optional_products: [Products.Investments], 
+    });
     return NextResponse.json(response.data);
+    // Error Handling
   } catch (error) {
     console.error("Error creating link token:", error);
     return NextResponse.json(
