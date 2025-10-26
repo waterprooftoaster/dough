@@ -1,89 +1,38 @@
 "use client"
-
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-	usePlaidLink,
-	PlaidLinkOnExit,
-	PlaidLinkOnExitMetadata,
-	PlaidLinkError,
-} from "react-plaid-link";
 import { MenuBar } from '../components/menu-bar';
-
-//to do list:
-// 3. a dashboard component to show the accounts
-// 4. a credit card suggestor page
+import { PlaidLink } from '../components/plaid-link';
 
 export default function LandingPage() {
-	const [linkToken, setLinkToken] = useState<string | null>(null);
-
-	const getToken = useCallback(
-		async () => {
-			try {
-				const response = await fetch("/api/plaid/create-link-token", { method: "POST", });
-				if (!response.ok) throw new Error("Failed to create link token");
-				const { link_token } = await response.json();
-				setLinkToken(link_token);
-			} catch (error) {
-				console.error("Error getting link token:", error);
-			}
-		}, []
-	);
-
-	const onSuccess = useCallback(
-		async (public_token: string) => {
-			try {
-				const response = await fetch("/api/plaid/create-plaid-item", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ public_token }),
-				});
-				if (!response.ok) throw new Error("Failed to exchange token");
-			} catch (error) {
-				console.error("Error linking account:");
-			}
-		}, []
-	);
-
-	const onExit = useCallback<PlaidLinkOnExit>(
-		(error: PlaidLinkError | null, metadata: PlaidLinkOnExitMetadata) => {
-			if (error != null && error.error_code === 'INVALID_LINK_TOKEN') { getToken(); }
-			// to handle other error codes, see https://plaid.com/docs/errors/
-			console.log("User exited Plaid Link flow", { error, metadata });
-		}, [getToken]
-	);
-
-	const { open, ready } = usePlaidLink({
-		token: linkToken,
-		onSuccess,
-		onExit
-	});
-
-	// Get link token
-	useEffect(() => {
-		if (!linkToken) { getToken(); }
-	}, [linkToken, getToken]);
-
 	return (
-		<div className="min-h-screen">
-
-			{/* Menu Bar */}
+		<>
 			<MenuBar />
+			<section className="w-full">
+				<div className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
+					<div className="grid items-center gap-10 lg:grid-cols-2">
+						{/* Left: Headline + CTA */}
+						<div className="max-w-xl">
+							<h1 className="text-5xl font-semibold tracking-tight leading-[1.05] text-zinc-900 sm:text-6xl">
+								Money talks, dough listens.
+							</h1>
+							<div className="mt-8">
+								<PlaidLink />
+							</div>
+						</div>
 
-			{/* Main landing content */}
-			<main className="flex flex-col items-center justify-left flex-1 px-4 py-12 text-left">
-				<h1 className="text-5xl font-bold mb-4"> Money Talks, </h1>
-				<h1 className="text-5xl font-bold mb-4"> Dough Listens. </h1>
-				<div className="flex space-x-3 items-center">
-					<button
-						onClick={() => open()}
-						disabled={!ready}
-						className="px-4 py-2 bg-primary rounded-lg hover:bg-primary/80 disabled:opacity-50 transition-colors"
-					>
-						Connect Bank
-					</button>
+						{/* Right: Image placeholder */}
+						<div className="relative">
+							<div className="aspect-[4/3] w-full overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50">
+								{/* Replace the src with your actual asset when ready */}
+								<img
+									src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='900'><rect width='100%' height='100%' fill='%23f6f6f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='28' fill='%23999'>Hero image placeholder</text></svg>"
+									alt="Product preview"
+									className="h-full w-full object-cover"
+								/>
+							</div>
+						</div>
+					</div>
 				</div>
-			</main>
-		</div>
-
+			</section>
+		</>
 	)
 }
