@@ -10,7 +10,7 @@ import { cn } from "@/src/lib/utils"
 
 export function MenuBar() {
   return (
-    <header className="flex justify-center p-6 shadow-md">
+    <header className="flex fixed shadow-md bg-background z-50 top-0 left-0 right-0 p-3">
       <NavigationMenu viewport={false}>
         <NavigationMenuList>
           <NavigationMenuItem>
