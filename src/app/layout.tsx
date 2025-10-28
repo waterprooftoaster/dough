@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 const spectral = Spectral({
   variable: "--font-spectral",
   subsets: ["latin"],
-  weight: ["500"]
+  weight: ["400"]
 })
 
 export const metadata: Metadata = {
