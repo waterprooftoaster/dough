@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 const spectral = Spectral({
-  variable: "--front-spectral",
+  variable: "--font-spectral",
   subsets: ["latin"],
-  weight: ["400", "700"]
+  weight: ["500"]
 })
 
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${spectral.variable} antialiased`}
       >
         {children}
       </body>
