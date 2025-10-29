@@ -14,7 +14,7 @@ export async function aggregateTransactions(plaidItem: PlaidItem) {
   const removedTx: Transaction[] = [];
   const moddedTx: Transaction[] = [];
   let hasMore = true;
-  let nextCursor = plaidItem.transactionCursor ?? ""; // Start at "bookmark"
+  let nextCursor = plaidItem.cursor ?? ""; // Start at "bookmark"
   console.log(`Starting transaction sync for item: ${plaidItem.itemId}...`);
   // Reference: https://plaid.com/docs/transactions/
   while (hasMore) {
@@ -55,7 +55,7 @@ export async function aggregateTransactions(plaidItem: PlaidItem) {
     if (!hasMore) {
       await prisma.plaidItem.update({
         where: { id: plaidItem.id },
-        data: { transactionCursor: data.next_cursor }
+        data: { cursor: data.next_cursor }
       });
     }
   }
@@ -77,7 +77,7 @@ export async function aggregateTransactions(plaidItem: PlaidItem) {
 
 // Helper funcs
 async function createTransaction(tx: Transaction) {
-  const existingTx = await prisma.transaction.findUnique({ where: { transactionId: tx.transaction_id } })
+  const existingTx = await prisma.transaction.findUnique({ where: { txId: tx.transaction_id } })
   if (existingTx) {
     console.log(`Transaction id=${tx.transaction_id} already exists`);
     updateTransaction(tx);
@@ -92,7 +92,7 @@ async function createTransaction(tx: Transaction) {
     await prisma.transaction.create({
       data: {
         accountId: account.id,
-        transactionId: tx.transaction_id,
+        txId: tx.transaction_id,
         date: new Date(tx.date),
         name: tx.name,
         amount: tx.amount,
@@ -139,14 +139,14 @@ async function createTransaction(tx: Transaction) {
 }
 
 async function removeTransaction(tx: Transaction) {
-  const existingTx = await prisma.transaction.findUnique({ where: { transactionId: tx.transaction_id } });
+  const existingTx = await prisma.transaction.findUnique({ where: { txId: tx.transaction_id } });
   if (existingTx) {
     await prisma.transaction.delete({ where: { id: existingTx.id } });
   } else { console.warn(`Could not find transaction ${tx.transaction_id} for removal`) }
 }
 
 async function updateTransaction(tx: Transaction) {
-  const existingTx = await prisma.transaction.findUnique({ where: { transactionId: tx.transaction_id } });
+  const existingTx = await prisma.transaction.findUnique({ where: { txId: tx.transaction_id } });
   if (existingTx) {
     await prisma.transaction.update({
       where: { id: existingTx.id },

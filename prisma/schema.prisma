@@ -15,17 +15,17 @@ datasource db {
 }
 
 model PlaidItem {
-  id                String    @id @default(cuid())
-  itemId            String    @unique // Plaid's item_id
-  accessToken       String
-  provider          String    @default("plaid") // "plaid" or "coinbase"
-  institutionId     String?
-  institutionName   String?
-  institutionLogo   String?
-  transactionCursor String? // Plaid's cursor to track transaction fetching
-  accounts          Account[]
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id          String    @id @default(cuid())
+  itemId      String    @unique // Plaid's item_id
+  accessToken String
+  provider    String    @default("plaid") // "plaid" or "coinbase"
+  instId      String?
+  instName    String?
+  instLogo    String?
+  cursor      String? // Plaid's cursor to track transaction fetching
+  accounts    Account[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Account {
@@ -64,7 +64,7 @@ model Transaction {
   id                      String    @id @default(cuid())
   account                 Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
   accountId               String
-  transactionId           String    @unique // Plaid's transaction_id or investment_transaction_id
+  txId                    String    @unique // Plaid's transaction_id or investment_transaction_id
   date                    DateTime
   name                    String
   amount                  Float
@@ -81,7 +81,7 @@ model Transaction {
   isin                    String? // ISIN identifier
   cusip                   String? // CUSIP identifier
   sedol                   String? // SEDOL identifier
-  institutionSecurityId   String? // Institution's security identifier
+  instSecurityId          String? // Institution's security identifier
   securityName            String? // Descriptive name for the security
   securityType            String? // e.g., 'equity', 'mutual fund', etc.
   closePrice              Float? // Price at close of previous trading session
@@ -122,20 +122,20 @@ model Transaction {
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
 
-  @@unique([accountId, transactionId])
+  @@unique([accountId, txId])
   @@index([date])
 }
 
 model TransactionDownloadLog {
-  id              String   @id @default(cuid())
-  account         Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  accountId       String
-  startDate       DateTime
-  endDate         DateTime
-  numTransactions Int
-  status          String // 'success' or 'error'
-  errorMessage    String?
-  createdAt       DateTime @default(now())
+  id           String   @id @default(cuid())
+  account      Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  accountId    String
+  startDate    DateTime
+  endDate      DateTime
+  numTx        Int
+  status       String // 'success' or 'error'
+  errorMessage String?
+  createdAt    DateTime @default(now())
 
   @@index([accountId, createdAt])
 }
