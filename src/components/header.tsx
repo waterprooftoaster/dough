@@ -14,9 +14,9 @@ import {
   navigationMenuTriggerStyle,
 } from "@/src/components/ui/menu-bar"
 
-export function MenuBar() {
+export function Header() {
   return (
-    <header className="fixed flex items-center bg-black/20 backdrop-blur-lg top-0 left-0 right-0 z-50 p-3">
+    <header className="flex items-center bg-black top-0 left-0 right-0 z-50 p-3">
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>

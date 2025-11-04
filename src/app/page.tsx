@@ -1,26 +1,29 @@
 "use client"
 
-import { MenuBar } from '../components/header';
+import { Header } from '../components/header';
 import { PlaidLink } from '../components/plaid-link';
+import { MacbookScroll } from '@/src/components/ui/macbook-scroll';
 
 export default function LandingPage() {
 	return (
 		<>
-			<MenuBar />
-			<section
-				className="flex flex-col items-center justify-center h-screen bg-cover bg-center"
-				style={{ backgroundImage: "url(/tempBackground.jpg)" }}
-			>
-				<h1 className="text-9xl sm:text-9xl tracking-tight  font-spectral font-normal">
-					Money Talks,
-				</h1>
-				<h1 className="text-9xl sm:text-9xl tracking-tight font-spectral font-normal mt-2">
-					Dough Listens
-				</h1>
+			<Header />
+			<section>
+				<div className="w-full overflow-hidden bg-white dark:bg-[#0B0B0F]">
+					<MacbookScroll
+						title={
+							<span>
+								This Macbook is built with Tailwindcss. <br /> No kidding.
+							</span>
+						}
+						src={`/linear.webp`}
+						showGradient={false}
+					/>
+				</div>
 				<div>
 					<PlaidLink />
 				</div>
 			</section>
 		</>
-	)
+	);
 }
