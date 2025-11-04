@@ -16,7 +16,7 @@ import {
 
 export function Header() {
   return (
-    <header className="flex items-center bg-black top-0 left-0 right-0 z-50 p-3">
+    <header className="flex items-center bg-background top-0 left-0 right-0 p-6">
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>

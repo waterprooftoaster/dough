@@ -28,7 +28,6 @@ import { IconCaretDownFilled } from "@tabler/icons-react";
 export const MacbookScroll = ({
   src,
   showGradient,
-  title,
   badge,
 }: {
   src?: string;
@@ -53,36 +52,21 @@ export const MacbookScroll = ({
   const scaleX = useTransform(
     scrollYProgress,
     [0, 0.3],
-    [1.2, isMobile ? 1 : 1.5],
+    [1.2, isMobile ? 1 : 1.1],
   );
   const scaleY = useTransform(
     scrollYProgress,
     [0, 0.3],
-    [0.6, isMobile ? 1 : 1.5],
+    [0.6, isMobile ? 1 : 1.1],
   );
   const translate = useTransform(scrollYProgress, [0, 1], [0, 1500]);
   const rotate = useTransform(scrollYProgress, [0.1, 0.12, 0.3], [-28, -28, 0]);
-  const textTransform = useTransform(scrollYProgress, [0, 0.3], [0, 100]);
-  const textOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   return (
     <div
       ref={ref}
-      className="flex min-h-[200vh] shrink-0 scale-[0.35] transform flex-col items-center justify-start py-0 [perspective:800px] sm:scale-50 md:scale-100 md:py-80"
+      className="flex min-h-[100vh] shrink-0 transform flex-col items-center justify-start py-0 [perspective:800px] scale-110"
     >
-      <motion.h2
-        style={{
-          translateY: textTransform,
-          opacity: textOpacity,
-        }}
-        className="mb-20 text-center text-3xl font-bold text-neutral-800 dark:text-white"
-      >
-        {title || (
-          <span>
-            This Macbook is built with Tailwindcss. <br /> No kidding.
-          </span>
-        )}
-      </motion.h2>
       {/* Lid */}
       <Lid
         src={src}
@@ -111,7 +95,7 @@ export const MacbookScroll = ({
         <Trackpad />
         <div className="absolute inset-x-0 bottom-0 mx-auto h-2 w-20 rounded-tl-3xl rounded-tr-3xl bg-gradient-to-t from-[#272729] to-[#050505]" />
         {showGradient && (
-          <div className="absolute inset-x-0 bottom-0 z-50 h-40 w-full bg-gradient-to-t from-white via-white to-transparent dark:from-black dark:via-black"></div>
+          <div className="absolute inset-x-0 bottom-0 z-50 h-82 w-full bg-gradient-to-t from-white via-white to-transparent dark:from-black dark:via-black"></div>
         )}
         {badge && <div className="absolute bottom-4 left-4">{badge}</div>}
       </div>
@@ -119,7 +103,7 @@ export const MacbookScroll = ({
   );
 };
 
-const Lid = ({
+export const Lid = ({
   scaleX,
   scaleY,
   rotate,
@@ -146,8 +130,11 @@ const Lid = ({
           style={{
             boxShadow: "0px 2px 0px 2px #171717 inset",
           }}
-          className="absolute inset-0 flex rounded-lg bg-[#010101]"
+          className="absolute inset-0 flex items-center justify-center rounded-lg bg-[#010101]"
         >
+          <span className="text-white">
+            <DoughLogo />
+          </span>
         </div>
       </div>
       <motion.div
@@ -164,6 +151,7 @@ const Lid = ({
         <div className="absolute inset-0 rounded-lg bg-[#272729]" />
         <img
           src={src as string}
+          alt="aceternity logo"
           className="absolute inset-0 h-full w-full rounded-lg object-cover object-left-top"
         />
       </motion.div>
@@ -171,7 +159,7 @@ const Lid = ({
   );
 };
 
-const Trackpad = () => {
+export const Trackpad = () => {
   return (
     <div
       className="mx-auto my-1 h-32 w-[40%] rounded-xl"
@@ -182,7 +170,7 @@ const Trackpad = () => {
   );
 };
 
-const Keypad = () => {
+export const Keypad = () => {
   return (
     <div className="mx-1 h-full [transform:translateZ(0)] rounded-md bg-[#050505] p-1 [will-change:transform]">
       {/* First Row */}
@@ -540,7 +528,7 @@ const Keypad = () => {
   );
 };
 
-const KBtn = ({
+export const KBtn = ({
   className,
   children,
   childrenClassName,
@@ -582,7 +570,7 @@ const KBtn = ({
   );
 };
 
-const SpeakerGrid = () => {
+export const SpeakerGrid = () => {
   return (
     <div
       className="mt-2 flex h-40 gap-[2px] px-[0.5px]"
@@ -595,7 +583,7 @@ const SpeakerGrid = () => {
   );
 };
 
-const OptionKey = ({ className }: { className: string }) => {
+export const OptionKey = ({ className }: { className: string }) => {
   return (
     <svg
       fill="none"
@@ -624,6 +612,27 @@ const OptionKey = ({ className }: { className: string }) => {
         width="32"
         height="32"
         stroke="none"
+      />
+    </svg>
+  );
+};
+
+const DoughLogo = () => {
+  return (
+    <svg
+      width="66"
+      height="65"
+      viewBox="0 0 66 65"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-3 w-3 text-white"
+    >
+      <path
+        d="M8 8.05571C8 8.05571 54.9009 18.1782 57.8687 30.062C60.8365 41.9458 9.05432 57.4696 9.05432 57.4696"
+        stroke="currentColor"
+        strokeWidth="15"
+        strokeMiterlimit="3.86874"
+        strokeLinecap="round"
       />
     </svg>
   );

@@ -9,20 +9,18 @@ export default function LandingPage() {
 		<>
 			<Header />
 			<section>
-				<div className="w-full overflow-hidden bg-white dark:bg-[#0B0B0F]">
+				<div className="bg-background scale-110 sm:scale-60 md:scale-100 py-80">
 					<MacbookScroll
-						title={
-							<span>
-								This Macbook is built with Tailwindcss. <br /> No kidding.
-							</span>
-						}
 						src={`/1750867581345.jpg`}
-						showGradient={false}
+						showGradient={true}
 					/>
 				</div>
 				<div>
 					<PlaidLink />
 				</div>
+			</section>
+			<section className="min-h-[200vh] bg-transparent">
+				test section
 			</section>
 		</>
 	);
