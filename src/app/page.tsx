@@ -1,6 +1,6 @@
 "use client"
 
-import { MenuBar } from '../components/menu-bar';
+import { MenuBar } from '../components/header';
 import { PlaidLink } from '../components/plaid-link';
 
 export default function LandingPage() {
