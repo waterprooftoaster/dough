@@ -4,7 +4,7 @@ import { Header } from '../components/header';
 import { PlaidLink } from '../components/plaid-link';
 import { MacbookScroll } from '@/src/components/ui/macbook-scroll';
 
-export default function LandingPage() {
+export default function Hero() {
 	return (
 		<>
 			<Header />
