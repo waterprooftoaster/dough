@@ -16,7 +16,7 @@ export default function LandingPage() {
 								This Macbook is built with Tailwindcss. <br /> No kidding.
 							</span>
 						}
-						src={`/linear.webp`}
+						src={`/1750867581345.jpg`}
 						showGradient={false}
 					/>
 				</div>
