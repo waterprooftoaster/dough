@@ -21,7 +21,7 @@ export function Header() {
         </NavigationMenuItem>
         <NavigationMenuItem className="hidden md:block">
           <NavigationMenuTrigger>Features</NavigationMenuTrigger>
-          <NavigationMenuContent>
+          <NavigationMenuContent className="z-50">
             <ul className="grid w-[300px] gap-4">
               <li>
                 <NavigationMenuLink asChild>
