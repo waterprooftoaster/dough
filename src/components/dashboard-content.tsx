@@ -33,6 +33,34 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+interface DashboardContentProps {
+  data: NetWorthDataPoint[];
+}
+
+export function DashboardContent({ data }: DashboardContentProps) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground">Track your net worth over time</p>
+      </div>
+
+      {data.length > 0 ? (
+        <div className="bg-card rounded-lg border border-border p-6">
+          <h2 className="text-lg font-semibold mb-4">Net Worth Trend</h2>
+          <NetWorthChart data={data} />
+        </div>
+      ) : (
+        <div className="bg-card rounded-lg border border-border p-12">
+          <p className="text-center text-muted-foreground">
+            No balance data available yet. Connect an account to get started.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NetWorthChart({ data }: NetWorthChartProps) {
   const formattedData = useMemo(() => {
     return data.map((point) => ({
@@ -102,33 +130,5 @@ function NetWorthChart({ data }: NetWorthChartProps) {
         />
       </AreaChart>
     </ChartContainer>
-  );
-}
-
-interface DashboardContentProps {
-  data: NetWorthDataPoint[];
-}
-
-export function DashboardContent({ data }: DashboardContentProps) {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Track your net worth over time</p>
-      </div>
-
-      {data.length > 0 ? (
-        <div className="bg-card rounded-lg border border-border p-6">
-          <h2 className="text-lg font-semibold mb-4">Net Worth Trend</h2>
-          <NetWorthChart data={data} />
-        </div>
-      ) : (
-        <div className="bg-card rounded-lg border border-border p-12">
-          <p className="text-center text-muted-foreground">
-            No balance data available yet. Connect an account to get started.
-          </p>
-        </div>
-      )}
-    </div>
   );
 }
