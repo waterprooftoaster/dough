@@ -14,10 +14,10 @@ export async function POST(request: Request) {
 
   let plaidItems: PlaidItem[] = [];
   if (institution_id) {
-    plaidItems = await prisma.plaidItem.findMany({ where: { institutionId: institution_id } });
+    plaidItems = await prisma.plaidItem.findMany({ where: { instId: institution_id } });
   }
   if (institution_name) {
-    plaidItems = await prisma.plaidItem.findMany({ where: { institutionName: institution_name } });
+    plaidItems = await prisma.plaidItem.findMany({ where: { instName: institution_name } });
   }
   else {
     // Sync all items

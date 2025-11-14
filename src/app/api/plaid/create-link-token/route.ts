@@ -12,9 +12,9 @@ export async function POST() {
       country_codes: [CountryCode.Us],
       language: "en",
       transactions: {
-        days_requested: 730, 
+        days_requested: 730,
       },
-      optional_products: [Products.Investments], 
+      optional_products: [Products.Investments],
     });
     return NextResponse.json(response.data);
     // Error Handling
