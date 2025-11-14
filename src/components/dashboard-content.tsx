@@ -1,49 +1,115 @@
-import { prisma } from "@/src/lib/db";
-import { NetWorthChart } from "@/src/components/net-worth-chart";
+"use client";
 
-async function getNetWorthData() {
-  try {
-    // Get all account balances ordered by date
-    const balances = await prisma.accountBalance.findMany({
-      orderBy: {
-        date: "asc",
-      },
-      include: {
-        account: true,
-      },
-    });
+import { useMemo } from "react";
+import {
+  AreaChart,
+  Area,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/src/components/ui/chart";
 
-    if (balances.length === 0) {
-      return [];
-    }
-
-    // Group balances by date and sum them up
-    const netWorthByDate = new Map<string, number>();
-
-    balances.forEach((balance) => {
-      const dateStr = balance.date.toISOString().split("T")[0]; // YYYY-MM-DD format
-      const current = netWorthByDate.get(dateStr) || 0;
-      netWorthByDate.set(dateStr, current + balance.current);
-    });
-
-    // Convert to array and sort by date
-    const data = Array.from(netWorthByDate.entries())
-      .map(([date, totalNetWorth]) => ({
-        date,
-        totalNetWorth,
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    return data;
-  } catch (error) {
-    console.error("Error fetching net worth data:", error);
-    return [];
-  }
+export interface NetWorthDataPoint {
+  date: string;
+  totalNetWorth: number;
 }
 
-export async function DashboardContent() {
-  const data = await getNetWorthData();
+interface NetWorthChartProps {
+  data: NetWorthDataPoint[];
+}
 
+const chartConfig = {
+  totalNetWorth: {
+    label: "Net Worth",
+    color: "var(--chart-1)",
+  },
+} satisfies ChartConfig;
+
+function NetWorthChart({ data }: NetWorthChartProps) {
+  const formattedData = useMemo(() => {
+    return data.map((point) => ({
+      ...point,
+      displayDate: new Date(point.date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+    }));
+  }, [data]);
+
+  return (
+    <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
+      <AreaChart data={formattedData} accessibilityLayer>
+        <defs>
+          <linearGradient id="colorNetWorth" x1="0" y1="0" x2="0" y2="1">
+            <stop
+              offset="5%"
+              stopColor="var(--chart-1)"
+              stopOpacity={0.8}
+            />
+            <stop
+              offset="95%"
+              stopColor="var(--chart-1)"
+              stopOpacity={0.1}
+            />
+          </linearGradient>
+        </defs>
+        <CartesianGrid vertical={false} stroke="var(--border)" />
+        <XAxis
+          dataKey="displayDate"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          tick={{ fontSize: 12 }}
+        />
+        <YAxis
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          tick={{ fontSize: 12 }}
+          tickFormatter={(value) =>
+            `$${(value / 1000).toFixed(0)}k`
+          }
+        />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              labelKey="displayDate"
+              formatter={(value) =>
+                `$${Number(value).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}`
+              }
+            />
+          }
+        />
+        <Area
+          type="monotone"
+          dataKey="totalNetWorth"
+          stroke="var(--chart-1)"
+          strokeWidth={2}
+          fill="url(#colorNetWorth)"
+          dot={false}
+          isAnimationActive={true}
+        />
+      </AreaChart>
+    </ChartContainer>
+  );
+}
+
+interface DashboardContentProps {
+  data: NetWorthDataPoint[];
+}
+
+export function DashboardContent({ data }: DashboardContentProps) {
   return (
     <div className="space-y-6">
       <div>
