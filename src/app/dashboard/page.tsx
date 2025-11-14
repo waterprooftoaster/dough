@@ -1,9 +1,9 @@
-"use client";
+import { DashboardContent } from "@/src/components/dashboard-content";
 
 export default function Dashboard() {
   return (
-    <div>
-      <span>Dashboard Page</span>
-    </div>
+    <main className="p-6">
+      <DashboardContent />
+    </main>
   );
 }
