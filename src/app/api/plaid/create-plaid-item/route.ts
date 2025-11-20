@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { plaidClient } from "@/src/lib/plaid-client";
 import { prisma } from "@/src/lib/db";
-import { aggregateTransactions } from "@/src/lib/transactions";
+import { updateTransactions } from "@/src/lib/transactions";
 import {
   CountryCode,
   Institution
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
 
   // Update Transactions and balances for accounts
   console.log(`Getting transactions for plaidItem id=${item_id}...`)
-  await aggregateTransactions(newItem);
+  await updateTransactions(newItem);
 
   return NextResponse.json({
     success: true,
