@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { plaidClient } from "@/src/lib/plaid-client";
 import { prisma } from "@/src/lib/db";
-import { aggregateTransactions } from "@/src/lib/transactions";
+import { updateTransactions } from "@/src/lib/transactions";
 import {
   CountryCode,
   Institution
@@ -54,10 +54,10 @@ export async function POST(request: Request) {
   // Check for existing institution in DB before creating new PlaidItem
   // If existingInstitution(s) are found, delete the old Item(s).
   if (institution?.institution_id) {
-    const existingItems = await prisma.plaidItem.findMany({ where: { institutionId: institution.institution_id } });
+    const existingItems = await prisma.plaidItem.findMany({ where: { instId: institution.institution_id } });
     if (existingItems.length > 0) {
       console.log(`Duplicate institution: id: ${institution.institution_id} name: ${institution.name} found, deleting duplicate...`);
-      await prisma.plaidItem.deleteMany({ where: { institutionId: institution.institution_id } });
+      await prisma.plaidItem.deleteMany({ where: { instId: institution.institution_id } });
     }
   }
 
@@ -68,9 +68,9 @@ export async function POST(request: Request) {
     data: {
       itemId: item_id,
       accessToken: access_token,
-      institutionId: institution?.institution_id || null,
-      institutionName: institution?.name || null,
-      institutionLogo: institution?.logo || null
+      instId: institution?.institution_id || null,
+      instName: institution?.name || null,
+      instLogo: institution?.logo || null
     },
   });
 
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
 
   // Update Transactions and balances for accounts
   console.log(`Getting transactions for plaidItem id=${item_id}...`)
-  await aggregateTransactions(newItem);
+  await updateTransactions(newItem);
 
   return NextResponse.json({
     success: true,

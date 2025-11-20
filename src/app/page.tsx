@@ -1,20 +1,22 @@
 "use client"
 
+
+// import { useRef } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
+import { Header } from '../components/header';
+import { MacbookScroll } from '@/src/components/ui/macbook-scroll';
+
 import {
 	usePlaidLink,
 	PlaidLinkOnExit,
 	PlaidLinkOnExitMetadata,
 	PlaidLinkError,
 } from "react-plaid-link";
-import { MenuBar } from '../components/menu-bar';
 
-//to do list:
-// 3. a dashboard component to show the accounts
-// 4. a credit card suggestor page
+// import { PlaidLink, PlaidLinkHandle } from '../lib/plaid-link';
 
-export default function LandingPage() {
-	const [linkToken, setLinkToken] = useState<string | null>(null);
+export default function Hero() {
+	/* const [linkToken, setLinkToken] = useState<string | null>(null);
 
 	const getToken = useCallback(
 		async () => {
@@ -62,27 +64,41 @@ export default function LandingPage() {
 	useEffect(() => {
 		if (!linkToken) { getToken(); }
 	}, [linkToken, getToken]);
-
+ */
 	return (
-		<div className="min-h-screen bg-gray-50">
-
-			{/* Menu Bar */}
-			<MenuBar />
-
-			{/* Main landing content */}
-			<main className="flex flex-col items-center justify-left flex-1 px-4 py-12 text-left">
-				<h1 className="text-5xl font-bold mb-4"> Money Talks, </h1>
-				<h1 className="text-5xl font-bold mb-4"> Dough Listens. </h1>
-				<div className="flex space-x-3 items-center">
-					<button
-						onClick={() => open()}
-						disabled={!ready}
-						className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-					>
-						Connect Bank
-					</button>
+		<>
+			<Header />
+			<section>
+				<div className="bg-background scale-115 sm:scale-60 md:scale-100 pt-40">
+					<MacbookScroll
+						src={`/Screenshot1.png`}
+						showGradient={true}
+					/>
 				</div>
-			</main>
-		</div>
-	)
+				{/* <div className="pr-10">
+					<PlaidLink ref={linkRef} />
+					<button
+						onClick={() => linkRef.current?.open()}
+						disabled={!linkRef.current?.ready}
+						className={`
+							px-4 py-2 rounded-md text-white
+							${linkRef.current?.ready ? 'bg-background' : 'bg-gray-500 opacity-60'}`
+						}
+					>
+						Connect bank
+					</button>
+				</div> */}
+
+			</section>
+			<div className="flex space-x-3 items-center">
+				{/* <button
+					onClick={() => open()}
+					disabled={!ready}
+					className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+				>
+					Connect Bank
+				</button> */}
+			</div>
+		</>
+	);
 }
