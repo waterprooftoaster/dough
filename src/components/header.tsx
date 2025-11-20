@@ -1,5 +1,10 @@
+//components/header.tsx
+"use client"
+
 import Link from "next/link"
+import { useRef } from 'react';
 import { useIsMobile } from "@/src/hooks/use-mobile"
+import { PlaidLink, PlaidLinkHandle } from '../lib/plaid-link';
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -11,8 +16,9 @@ import {
 
 export function Header() {
   const isMobile = useIsMobile();
+  const linkRef = useRef<PlaidLinkHandle>(null);
   return (
-    <header className="flex items-center bg-background top-0 left-0 right-0 p-6 pl-10 z-100">
+    <header className="flex items-center justify-between bg-background top-0 left-0 right-0 p-6 pl-10 z-100">
       <NavigationMenu viewport={isMobile}>
         <NavigationMenuItem>
           <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
@@ -26,25 +32,25 @@ export function Header() {
               <li>
                 <NavigationMenuLink asChild>
                   <Link href="#">
-                    <div className="font-medium">Components</div>
+                    <div className="font-medium">Dashboard</div>
                     <div className="text-muted-foreground">
-                      Browse all components in the library.
+                      All of your finances displayed beautifully.
                     </div>
                   </Link>
                 </NavigationMenuLink>
                 <NavigationMenuLink asChild>
                   <Link href="#">
-                    <div className="font-medium">Documentation</div>
+                    <div className="font-medium">Credit Card</div>
                     <div className="text-muted-foreground">
-                      Learn how to use the library.
+                      Alogrithmcally calculate the credit cards.
                     </div>
                   </Link>
                 </NavigationMenuLink>
                 <NavigationMenuLink asChild>
                   <Link href="#">
-                    <div className="font-medium">Blog</div>
+                    <div className="font-medium"> Big Purchases</div>
                     <div className="text-muted-foreground">
-                      Read our latest blog posts.
+                      See how smart is your next big purchase.
                     </div>
                   </Link>
                 </NavigationMenuLink>
@@ -53,6 +59,19 @@ export function Header() {
           </NavigationMenuContent>
         </NavigationMenuItem>
       </NavigationMenu>
+      <div className="pr-10">
+        <PlaidLink ref={linkRef} />
+        <button
+          onClick={() => linkRef.current?.open()}
+          disabled={!linkRef.current?.ready}
+          className={`
+            px-4 py-2 rounded-md text-white
+            ${linkRef.current?.ready ? 'bg-background' : 'bg-gray-500 opacity-60 cursor-not-allowed'}`
+          }
+        >
+          Connect bank
+        </button>
+      </div>
     </header>
   )
 }
