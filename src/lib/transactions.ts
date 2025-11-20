@@ -1,14 +1,15 @@
-import { NextResponse } from 'next/server'
+/* Updates all transactions of an item */
+
 import { PlaidItem } from "@prisma/client";
-import { plaidClient } from "@/src/lib/plaid-client";
 import { prisma } from "@/src/lib/db";
+import { plaidClient } from '@/src/lib/plaid-client';
 import {
   Transaction,
   InvestmentTransaction,
   Security,
 } from "plaid";
 
-export async function aggregateTransactions(plaidItem: PlaidItem) {
+export async function updateTransactions(plaidItem: PlaidItem) {
   // Get all transactions
   const addedTx: Transaction[] = [];
   const removedTx: Transaction[] = [];
@@ -191,5 +192,6 @@ async function updateTransaction(tx: Transaction) {
         referenceNumber: tx.payment_meta?.reference_number,
       }
     });
-  } else { console.warn(`Could not find transaction ${tx.transaction_id} for modification`) }
+  }
+  else { console.warn(`Could not find transaction:${tx.transaction_id} for updates`) }
 }
