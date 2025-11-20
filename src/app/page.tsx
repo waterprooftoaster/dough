@@ -71,7 +71,7 @@ export default function Hero() {
 			<section>
 				<div className="bg-background scale-115 sm:scale-60 md:scale-100 pt-40">
 					<MacbookScroll
-						src={`/1750867581345.jpg`}
+						src={`/Screenshot1.png`}
 						showGradient={true}
 					/>
 				</div>
