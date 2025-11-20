@@ -1,4 +1,4 @@
-import { aggregateTransactions } from '@/src/lib/transactions';
+import { updateTransactions } from '@/src/lib/transactions';
 import { NextResponse } from 'next/server'
 import { PlaidItem } from "@prisma/client";
 import { prisma } from "@/src/lib/db";
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     // Sync all items
     plaidItems = await prisma.plaidItem.findMany();
   }
-  plaidItems.forEach((item) => { aggregateTransactions(item); });
+  plaidItems.forEach((item) => { updateTransactions(item); });
 
   return NextResponse.json({ success: true, itemsSynced: plaidItems.length });
 }
