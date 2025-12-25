@@ -28,19 +28,19 @@ export async function getNetWorthData(): Promise<NetWorthDataPoint[]> {
     }
 
     // Declare the return data
-    let data: NetWorthDataPoint[] = [];
+    let data : NetWorthDataPoint[] = [];
 
     // Get current networth first
-    let currNetworth = 0;
+    let  currNetworth = 0; 
     balances.forEach((balance) => {
       if (balance.limit && balance.available) {
-        currNetworth += (balance.limit - balance.available);
+         currNetworth += (balance.limit - balance.available);
       }
       currNetworth += balance.current
     })
 
     // Add current net worth to array
-    const currDataPoint: NetWorthDataPoint = {
+    const currDataPoint : NetWorthDataPoint = {
       date: new Date().toISOString(),
       netWorth: currNetworth
     }
@@ -58,15 +58,13 @@ export async function getNetWorthData(): Promise<NetWorthDataPoint[]> {
         }
       })
 
-      // Change balance according to transaction
       transactions.forEach((tx) => { newNetWorth -= tx.amount; })
-
-      // Create and add new data point
-      const newDataPoint: NetWorthDataPoint = {
+      
+      const newDataPoint : NetWorthDataPoint = {
         date: currDate.toISOString(),
         netWorth: newNetWorth
       }
-      data.unshift(newDataPoint);
+      data.unshift( newDataPoint );
     }
 
     return data;
