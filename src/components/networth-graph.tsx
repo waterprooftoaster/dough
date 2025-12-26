@@ -40,11 +40,6 @@ interface DashboardContentProps {
 export function DashboardContent({ data }: DashboardContentProps) {
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Track your net worth over time</p>
-      </div>
-
       {data.length > 0 ? (
         <div className="bg-card rounded-lg border border-border p-6">
           <h2 className="text-lg font-semibold mb-4">Net Worth Trend</h2>

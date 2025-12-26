@@ -1,5 +1,5 @@
 import { getNetWorthData } from "@/src/lib/networth";
-import { DashboardContent } from "@/src/components/dashboard-content";
+import { DashboardContent } from "@/src/components/networth-graph";
 import { Header } from "@/src/components/header";
 
 export default async function Dashboard() {
