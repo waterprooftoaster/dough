@@ -1,7 +1,7 @@
 import { updateTransactions } from '@/src/lib/transactions';
 import { NextResponse } from 'next/server'
 import { PlaidItem } from "@prisma/client";
-import { prisma } from "@/src/lib/db";
+import { prisma } from "@/src/lib/prisma-client";
 
 export async function POST(request: Request) {
   // Get transactions by bank. If no institution details provided, sync all items.
