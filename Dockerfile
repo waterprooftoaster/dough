@@ -42,8 +42,10 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 
 # Copy the rest of the source files into the image.
 COPY . .
-# Run the build script.
-RUN npm run build
+# Generate Prisma client before building.
+RUN npx prisma generate
+# Run the build script with placeholder env vars (required for build-time imports).
+RUN PLAID_CLIENT_ID=placeholder PLAID_SECRET=placeholder npm run build
 
 ################################################################################
 # Create a new stage to run the application with minimal runtime dependencies
