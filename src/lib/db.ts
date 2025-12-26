@@ -19,36 +19,58 @@ export async function getNetWorthData(): Promise<NetWorthDataPoint[]> {
   try {
     // Get all account balances ordered by date
     const balances = await prisma.accountBalance.findMany({
-      orderBy: {
-        date: "asc",
-      },
       include: {
         account: true,
       },
     });
-
     if (balances.length === 0) {
       return [];
     }
 
-    // Group balances by date and sum them up
-    const netWorthByDate = new Map<string, number>();
+    // Declare the return data
+    let data: NetWorthDataPoint[] = [];
 
+    // Get current networth first
+    let currNetworth = 0;
     balances.forEach((balance) => {
-      const dateStr = balance.date.toISOString().split("T")[0]; // YYYY-MM-DD format
-      const current = netWorthByDate.get(dateStr) || 0;
-      netWorthByDate.set(dateStr, current + balance.current);
-    });
+      if (balance.limit && balance.available) {
+        currNetworth += (balance.limit - balance.available);
+      }
+      currNetworth += balance.current
+    })
 
-    // Convert to array and sort by date
-    const data = Array.from(netWorthByDate.entries())
-      .map(([date, totalNetWorth]) => ({
-        date,
-        totalNetWorth,
-      }))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Add current net worth to array
+    const currDataPoint: NetWorthDataPoint = {
+      date: new Date().toISOString(),
+      totalNetWorth: currNetworth
+    }
+    data.unshift(currDataPoint);
+
+    // Now we get all of the days
+    let currDate = new Date();
+    let timeBack = 30;
+    for (let i = 0; i < timeBack; i++) {
+      currDate.setDate(currDate.getDate() - 1);
+      let newNetWorth = currNetworth;
+      const transactions = await prisma.transaction.findMany({
+        where: {
+          date: currDate
+        }
+      })
+
+      // Change balance according to transaction
+      transactions.forEach((tx) => { newNetWorth -= tx.amount; })
+
+      // Create and add new data point
+      const newDataPoint: NetWorthDataPoint = {
+        date: currDate.toISOString(),
+        totalNetWorth: newNetWorth
+      }
+      data.unshift(newDataPoint);
+    }
 
     return data;
+
   } catch (error) {
     console.error("Error fetching net worth data:", error);
     return [];
