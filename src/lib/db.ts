@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== "production") {
 
 export interface NetWorthDataPoint {
   date: string;
-  netWorth: number;
+  totalNetWorth: number;
 }
 
 export async function getNetWorthData(): Promise<NetWorthDataPoint[]> {
@@ -42,7 +42,7 @@ export async function getNetWorthData(): Promise<NetWorthDataPoint[]> {
     // Add current net worth to array
     const currDataPoint: NetWorthDataPoint = {
       date: new Date().toISOString(),
-      netWorth: currNetworth
+      totalNetWorth: currNetworth
     }
     data.unshift(currDataPoint);
 
@@ -64,7 +64,7 @@ export async function getNetWorthData(): Promise<NetWorthDataPoint[]> {
       // Create and add new data point
       const newDataPoint: NetWorthDataPoint = {
         date: currDate.toISOString(),
-        netWorth: newNetWorth
+        totalNetWorth: newNetWorth
       }
       data.unshift(newDataPoint);
     }
