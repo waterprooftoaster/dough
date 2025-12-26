@@ -24,7 +24,7 @@ export async function getNetWorthData(): Promise<NetWorthDataPoint[]> {
     let currNetworth = 0;
     balances.forEach((balance) => {
       if (balance.limit && balance.available) {
-        currNetworth += (balance.limit - balance.available);
+        currNetworth -= (balance.limit - balance.available);
       }
       currNetworth += balance.current
     })

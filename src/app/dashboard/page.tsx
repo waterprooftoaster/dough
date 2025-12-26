@@ -1,4 +1,4 @@
-import { getNetWorthData } from "@/src/lib/prisma-client";
+import { getNetWorthData } from "@/src/lib/networth";
 import { DashboardContent } from "@/src/components/dashboard-content";
 import { Header } from "@/src/components/header";
 
