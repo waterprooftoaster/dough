@@ -1,5 +1,5 @@
 import { getNetWorthData } from "@/src/lib/networth";
-import { DashboardContent } from "@/src/components/networth-graph";
+import { NetworthGraph } from "@/src/components/networth-graph";
 import { Header } from "@/src/components/header";
 
 export default async function Dashboard() {
@@ -9,9 +9,8 @@ export default async function Dashboard() {
     <>
       <Header />
       <main className="p-6">
-        <DashboardContent data={data} />
+        <NetworthGraph data={data} />
       </main>
-      );
     </>
   )
 }

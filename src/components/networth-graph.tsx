@@ -16,15 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/src/components/ui/chart";
-
-export interface NetWorthDataPoint {
-  date: string;
-  totalNetWorth: number;
-}
-
-interface NetWorthChartProps {
-  data: NetWorthDataPoint[];
-}
+import { NetWorthDataPoint } from "../lib/networth";
 
 const chartConfig = {
   totalNetWorth: {
@@ -33,17 +25,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-interface DashboardContentProps {
-  data: NetWorthDataPoint[];
-}
-
-export function DashboardContent({ data }: DashboardContentProps) {
+export function NetworthGraph({ data }: { data: NetWorthDataPoint[] }) {
   return (
     <div className="space-y-6">
       {data.length > 0 ? (
         <div className="bg-card rounded-lg border border-border p-6">
           <h2 className="text-lg font-semibold mb-4">Net Worth Trend</h2>
-          <NetWorthChart data={data} />
+          {Plot(data)}
         </div>
       ) : (
         <div className="bg-card rounded-lg border border-border p-12">
@@ -56,7 +44,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
   );
 }
 
-function NetWorthChart({ data }: NetWorthChartProps) {
+function Plot(data: NetWorthDataPoint[]) {
   const formattedData = useMemo(() => {
     return data.map((point) => ({
       ...point,
