@@ -37,8 +37,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# prisma
+/src/generated/prisma
+/prisma/dev.db
+
+#claude
+CLAUDE.md
+
 #misc
 openapitools.json
 2020-09-14.yml
-/src/generated/prisma
-/prisma/dev.db
+
+
