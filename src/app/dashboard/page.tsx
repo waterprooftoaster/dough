@@ -11,7 +11,6 @@ export default async function Dashboard() {
       <main className="p-6">
         <DashboardContent data={data} />
       </main>
-      );
     </>
   )
 }

@@ -15,15 +15,13 @@ export async function POST(request: Request) {
   let plaidItems: PlaidItem[] = [];
   if (institution_id) {
     plaidItems = await prisma.plaidItem.findMany({ where: { instId: institution_id } });
-  }
-  if (institution_name) {
+  } else if (institution_name) {
     plaidItems = await prisma.plaidItem.findMany({ where: { instName: institution_name } });
-  }
-  else {
+  } else {
     // Sync all items
     plaidItems = await prisma.plaidItem.findMany();
   }
-  plaidItems.forEach((item) => { updateTransactions(item); });
+  await Promise.all(plaidItems.map((item) => updateTransactions(item)));
 
   return NextResponse.json({ success: true, itemsSynced: plaidItems.length });
 }

@@ -1,5 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "react-grid-layout/css/styles.css";
+@import "react-resizable/css/styles.css";
+
+.react-grid-placeholder {
+  opacity: 0 !important;
+}
+
+.dark .react-grid-placeholder {
+  opacity: 0 !important;
+}
 
 @custom-variant dark (&:is(.dark *));
 
