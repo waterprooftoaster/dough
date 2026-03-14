@@ -1,6 +1,6 @@
 /* Updates all transactions of an item */
 
-import { PlaidItem } from "@prisma/client";
+import { PlaidItem } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/lib/db";
 import { plaidClient } from '@/src/lib/plaid-client';
 import {

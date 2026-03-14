@@ -1,6 +1,6 @@
 import { updateTransactions } from '@/src/lib/transactions';
 import { NextResponse } from 'next/server'
-import { PlaidItem } from "@prisma/client";
+import { PlaidItem } from "@/src/generated/prisma/client";
 import { prisma } from "@/src/lib/db";
 
 export async function POST(request: Request) {
